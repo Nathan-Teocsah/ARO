@@ -1,14 +1,4 @@
 # IDEE
-1. Aide à la rédaction d'une preuve sous une forme différente de la façon linéaire de faire.
-2. Style : Plusieurs fenêtre avec "hypothèse" et "but" relié entre elles par un graphe
-3. Génère le code latex "linéaire", faisant un article cohérent logiquement
-
-# Techniquement
-1. Interface (fait avec Python ?) : à priori plutôt en javascript
-2. utiliser un compilateur (texlive par exemple)
-3. Un GUI (comme peut l'être TexStudio)
-
-# Question
-1. Comment faire inter-agir le compilateur et l'interface visuelle ?
-2. Comment fonctionne TexStudio ?
-    1. Ils utilisent du C, C++ et javascript
+Le programme _ARO.py_ est un programme d'aide à la rédaction, initialement destiné à la rédaction de document latex en mathématiques, mais dans le principe il peut être utilisé pour toute type de rédaction de document latex.
+	
+L'idée directrice d'_ARO_ est de pouvoir rédiger un document latex de manière non linéaire : on crée des notes qui contiennent un théorème (par exemple, ce peut aussi être, une définition, remarque, brouillon, etc.), chacune de ces notes contiennent aussi les notes qui permettent de la construire (les notes entrantes : ce sont les notes utiles pour définir ou construire le contenu de cette) et les notes qu'elle permet de construire (les notes sortantes : ce sont les notes qui utilisent le contenu de cette note). Puis l'algorithme se charge de générer un document structuré et partiellement rédigé de ces notes.
