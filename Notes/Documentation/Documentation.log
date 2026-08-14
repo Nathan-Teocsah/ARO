@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  14 AUG 2026 12:03
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  14 AUG 2026 15:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -23,8 +23,7 @@ File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 \belowcaptionskip=\skip50
 \bibindent=\dimen148
 )
-(/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/p
-ackage_perso.sty
+(/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/ARO/package_perso.sty
 (/usr/local/texlive/2025/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks17
@@ -1605,35 +1604,43 @@ l.45 	\newpage
                [1]
 Package marginnote Info: Using workaround for absolute page number on input lin
 e 45.
-
-Underfull \hbox (badness 10000) in paragraph at lines 58--59
-
- []
-
-[1{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/lo
-cal/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
+ [1{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/l
+ocal/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
 Package marginnote Info: Using workaround for absolute page number on input lin
-e 83.
-runsystem(latexminted cleantemp  --timestamp 20260814120352 5B6CF869265C13AF856
+e 87.
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 93.
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 94.
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
+
+[2] [3]
+runsystem(latexminted cleantemp  --timestamp 20260814155953 5B6CF869265C13AF856
 6F192B4AB3D2A)...executed safely (allowed).
 
-
-(./Documentation.aux)
+ (./Documentation.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-06>
  ***********
 Package rerunfilecheck Info: File `Documentation.out' has not changed.
-(rerunfilecheck)             Checksum: F187A7F52C71CFF21D394B5C9D33BEA9;477.
+(rerunfilecheck)             Checksum: 6AED23B12DCED4C0AD37929AC1053C92;1313.
  ) 
 Here is how much of TeX's memory you used:
- 51727 strings out of 467538
- 1243902 string characters out of 5419551
- 1927506 words of memory out of 5000000
- 79781 multiletter control sequences out of 15000+600000
- 691464 words of font info for 79 fonts, out of 8000000 for 9000
+ 51754 strings out of 467538
+ 1244124 string characters out of 5419551
+ 1928484 words of memory out of 5000000
+ 79793 multiletter control sequences out of 15000+600000
+ 687193 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 125i,5n,135p,732b,546s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 125i,5n,135p,742b,645s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/lo
 cal/texlive/2025/texmf-dist/fonts/type1/public/lm/lmbxi10.pfb></usr/local/texli
 ve/2025/texmf-dist/fonts/type1/public/lm/lmcsc10.pfb></usr/local/texlive/2025/t
@@ -1642,10 +1649,10 @@ fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1
 /public/lm/lmr17.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/
 lmri12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
 >
-Output written on Documentation.pdf (3 pages, 144750 bytes).
+Output written on Documentation.pdf (5 pages, 159314 bytes).
 PDF statistics:
- 131 PDF objects out of 1000 (max. 8388607)
- 85 compressed objects within 1 object stream
- 16 named destinations out of 1000 (max. 500000)
- 181 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 176 PDF objects out of 1000 (max. 8388607)
+ 127 compressed objects within 2 object streams
+ 31 named destinations out of 1000 (max. 500000)
+ 221 words of extra memory for PDF output out of 10000 (max. 10000000)
 

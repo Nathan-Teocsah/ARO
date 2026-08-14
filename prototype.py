@@ -293,7 +293,7 @@ def compile_maitre(path,filename,latex):
         stdout=subprocess.DEVNULL
     )
 
-    subprocess.run(["pdflatex", "-halt-on-error", "-output-directory=" + path, path + filename + ".tex"],
+    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
         stdout=subprocess.DEVNULL
     )
     

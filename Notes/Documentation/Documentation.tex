@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/package_perso}
+\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/ARO/package_perso}
 
 \begin{document}
 	\pagenumbering{gobble}
@@ -51,17 +51,19 @@
 	
 	Le programme \textit{ARO.py} est un programme d'aide à la rédaction, initialement destiné à la rédaction de document latex en mathématiques, mais dans le principe il peut être utilisé pour toute type de rédaction de document latex.
 	
-	L'idée directrice d'\textit{ARO} est de pouvoir rédiger un document latex de manière non linéaire : on crée des notes qui contiennent un théorème (par exemple, ce peut aussi être, une définition, remarque, brouillon, etc.), chacune de ces notes contiennent aussi les notes qui permettent de la construire (les notes entrantes : ce sont les notes utiles pour définir ou construire le contenu de cette) et les notes qu'elle permet de construire (les notes sortantes : ce sont les notes qui utilisent le contenu de cette note).
+	L'idée directrice d'\textit{ARO} est de pouvoir rédiger un document latex de manière non linéaire : on crée des notes qui contiennent un théorème (par exemple, ce peut aussi être, une définition, remarque, brouillon, etc.), chacune de ces notes contiennent aussi les notes qui permettent de la construire (les notes entrantes : ce sont les notes utiles pour définir ou construire le contenu de cette) et les notes qu'elle permet de construire (les notes sortantes : ce sont les notes qui utilisent le contenu de cette note). Puis l'algorithme se charge de générer un document structuré et partiellement rédigé de ces notes.
 	
 	\section{Système requis}
 	
-	Il est nécessaire d'avoir au préalable installé \textbf{python3} sur son ordinateur pour compiler le script ARO. De plus, dans l'état actuel des choses, il est nécessaire de posséder un système Linux pour pouvoir exécuter certaines des commandes du programme.\\
+	Il est nécessaire d'avoir au préalable installé \textbf{python3} et \textbf{xpdf} sur son ordinateur pour exécuter le script ARO. De plus, dans l'état actuel des choses, il est nécessaire de posséder un système Linux pour pouvoir exécuter certaines des commandes du programme.
 	
 	Pour le bon fonctionnement il est nécessaire de créer les dossiers et sous-dossiers (en gras) et les fichiers en italique suivants, dans le même dossier que celui contenu \textit{ARO.py} :
 	
 	\begin{enumerate}[label=$\star$]
 		\item \textit{ARO.py}
 		\item \textit{environnement}
+		\item \textit{package\_perso.sty}
+		\item \textit{package\_affichage.sty}
 		\item \textbf{Notes}
 		\begin{enumerate}[label=$-$]
 			\item \textbf{doc\_chronologique}
@@ -74,10 +76,50 @@
 		\end{enumerate}
 	\end{enumerate}
 	
-	\textbf{\underline{Remarque :}} Si vous avez récupéré le dossier d'installation sur github, tous ces dossiers et fichiers seront présents, et le fichier \textit{environnement sera pré-rempli}.
+	Seul les fichiers \textit{environnement}, \textit{package\_perso.sty} et \textit{package\_affichage.sty} sont les seuls fichiers à remplir soit même.
 	
-	\section{Fichier de configuration : \textit{environnement}}
+	\textbf{\underline{Remarque :}} Si vous avez récupéré le dossier d'installation sur github, tous ces dossiers et fichiers seront présents, et les fichiers \textit{environnement}, \textit{package\_perso.sty} et \textit{package\_affichage.sty} seront pré-rempli.
 	
-	Les deux autres fichiers : \textit{notes} et \textit{relations}, seront remplis automatiquement par le programme. 
+	\section{Configuration}	
+	
+	Les deux fichiers : \textit{notes} et \textit{relations}, seront remplis automatiquement par le programme. Il ne faut en aucun cas les modifier directement.
+	
+	\subsection{Fichier de configuration : \textit{environnement}}
+	
+	 Le fichier \textit{environnement} lui contient toutes les informations nécessaires pour générer les environnements [latex] : permet de formater l'affichage d'une note ou d'une relation entre deux notes. Par exemple pour le type "théorème" on va écrire dans le fichier :\\
+	 théorème*\\
+	 le *\\
+	 note*\\
+	 $\textbackslash$begin\{theorem\}*\\
+	 $\textbackslash$end\{theorem\}*
+	 
+	 L'étoile indique la fin d'un item donné. Le premier item correspond au type qu'on veut définir. Le deuxième item correspond au déterminant que l'on met devant le nom du type que l'on a défini, ici c'est "le " pour "le théorème", on oublie pas d'introduire un espace après "le" car on n'écrit certainement pas "lethéorème" contrairement à "l'équation". Le troisième item indique simplement que c'est une "note" et pas une "relation". Les deux dernier items permettent d'indiquer à l'algorithme comment créer l'environnement souhaité, ici il suffit d'écrire d'abord  $\textbackslash$begin\{theorem\} puis le contenu de la note de type "théorème" puis $\textbackslash$end\{theorem\}.
+	
+	\subsection{Package latex : \textit{package\_perso.sty} et \textit{package\_affichage.sty}}
+	
+	Ces deux packages permettent de compiler les fichiers latex généré, ceux fournis sont très dense car ce sont ceux que j'utilise personnellement mais ils peuvent être considérablement simplifié et ne contenir que ce qu'il faut pour créer les environnements prédéfinis 
+	
+	
+	\section{Fonctionnement général}
+	
+	\subsection{Notes}
+	
+	Tout ce qui est : proposition, note, remarque, théorème, etc. sont appelés des "Notes". Une \textit{Note} contient plus que le contenu de celle-ci, il y a aussi son type (théorème, corollaire, etc.), son numéro permettant de l'identifier et la liste des notes \textit{entrantes} et la liste des notes \textit{sortantes}. Voici un exemple :
+	\begin{center}
+		\textbf{Note 0}
+	\end{center}
+	\begin{enumerate}
+		\item \underline{Numéro :} \textit{0}
+		\item \underline{Type :} \textit{démonstration}
+		\item \underline{Contenu complet ?} \textit{Non}
+		\item \underline{Contenu :}\\
+		\hspace*{.5cm} La démonstration du grand théorème de Fermat est laissé au lecteur aguerri.
+		\item \underline{Note entrante :}\textit{ -}
+		\item \underline{Notes sortantes :}\textit{ note 2 et note 3}
+	\end{enumerate}
+	
+	\subsection{Relations}
+	
+	Tout lien entre 2 notes est appelé une relation. Une relation, bien qu'elle puisse avoir l’attribut "Equivalence", est toujours dans un unique sens et il n'est possible de définir qu'une seule relation entre 2 notes données. 
 	
 \end{document}
