@@ -1,0 +1,219 @@
+\NeedsTeXFormat{LaTeX2e}
+
+% Encodage et typographie
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{bbold}
+\usepackage{minted}
+\setminted{xleftmargin=-1cm,tabsize=3,gobble=1,framesep=10mm,baselinestretch=.85}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{pdfpages}
+
+
+% Mise en page
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage[all]{tcolorbox}
+
+% Mathématiques
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[standard, framed]{ntheorem}
+\usepackage{framed}
+\usepackage{pstricks}
+\usepackage{cancel}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{bm}
+\usepackage{nicematrix}
+\usepackage{arydshln}
+
+% Tableaux et graphiques
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
+\usepackage{caption}
+\pgfplotsset{compat=1.18}
+\usepackage{framed}
+\usepackage{pstricks}
+
+% Liens cliquables
+\PassOptionsToPackage{hidelinks}{hyperref}
+\usepackage{hyperref}
+
+% Marges
+\geometry{
+	margin=1cm,
+	top=.5cm,
+	bottom=1.2cm
+}
+
+% Interligne
+\onehalfspacing
+\setlength{\parskip}{0.5em}
+
+% Couleurs
+\definecolor{bleuTitre}{RGB}{0,70,140}
+\definecolor{bleuCadre}{RGB}{220,235,250}
+
+% Format des titres
+\titleformat{\section}
+{\color{bleuTitre}\Large\bfseries}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\color{bleuTitre}\large\bfseries}
+{\thesubsection}{1em}{}
+
+% Configuration des boîtes
+\tcbset{
+	colback=bleuCadre,
+	colframe=bleuTitre,
+	boxrule=0.8pt,
+	arc=3mm,
+	left=8pt, right=8pt, top=8pt, bottom=8pt
+}
+
+% Raccourcis
+%% nThéorème
+
+\newtheorem{Exercice}{Exercice}
+
+\newtheorem{Brouillon}{Brouillon}
+
+\newtheorem{Solution}{Solution}
+
+\newcommand{\theoremcolorbox}[2]{%
+	\def\theoremframecommand##1{%
+		\begin{tcolorbox}[
+			colframe=#1,
+			colback=#2,
+			arc=3mm,
+			boxrule=0.8pt,
+			left=6pt,
+			right=6pt,
+			top=6pt,
+			bottom=6pt
+			]
+			##1
+		\end{tcolorbox}
+	}%
+}
+
+\newcommand{\theoremcolorboxdot}[2]{%
+	\def\theoremframecommand##1{%
+		\begin{tcolorbox}[
+			enhanced,
+			arc=1.5mm,
+			frame hidden,
+			colback=#2,
+			left=6pt,
+			right=6pt,
+			top=6pt,
+			bottom=6pt,
+			borderline={0.5mm}{0mm}{dotted,#1}
+		]
+			##1
+		\end{tcolorbox}
+	}%
+}
+
+
+\theoremcolorbox{blue}{white}
+\newshadedtheorem{thm}[Theorem]{Théorème}
+
+\theoremcolorbox{red}{white}
+\newshadedtheorem{prop}[Proposition]{Proposition}
+
+\theoremcolorbox{Green}{white}
+\newshadedtheorem{defi}[Definition]{Définition}
+
+\theoremcolorbox{purple}{white}
+\newshadedtheorem{lm}[Lemma]{Lemme}
+
+\theoremcolorbox{purple}{white}
+\newshadedtheorem{cor}[Corollary]{Corollaire}
+
+\theoremcolorboxdot{lightgray}{white}
+\newshadedtheorem{dem}[Proof]{Preuve}
+
+\theoremcolorbox{gray}{white}
+\newshadedtheorem{ex}[Example]{Exemple}
+
+\definecolor{mygray}{gray}{0.9}
+\theoremcolorbox{blue}{mygray}
+\newshadedtheorem{exo}[Exercice]{Exercice}
+
+\colorlet{myblack}{black!50}
+\theoremcolorbox{myblack}{white}
+\newshadedtheorem{brouillon}[Brouillon]{Brouillon}
+
+\definecolor{myyellow}{rgb}{0.95,0.9,0.6}
+\theoremcolorbox{white}{myyellow}
+\newshadedtheorem{sol}[Solution]{Solution}
+
+\theoremcolorbox{white}{mygray}
+\newshadedtheorem{rmq}[Remark]{Remarque}
+
+%% Autre
+\newcommand{\m}{\mathcal}
+\newcommand{\re}{\operatorname{Re}}
+\newcommand{\im}{\operatorname{Im}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\enc}[3][\textwidth]{
+  \begin{minipage}{#1}%
+    \begin{tcolorbox}[colback=white, colframe=#2, arc=1mm, boxrule=1pt]%
+      #3%
+    \end{tcolorbox}%
+  \end{minipage}%
+}
+\newcommand*\abs[1]{\left\lvert #1 \right\rvert}
+\newcommand{\rouge}[1]{\textcolor{red}{#1}}
+\newcommand{\blanc}[1]{\textcolor{white}{#1}}
+\newcommand{\bleu}[1]{\textcolor{blue}{#1}}
+\definecolor{darkgreen}{RGB}{0, 102, 51}
+\renewcommand{\green}[1]{\textcolor{darkgreen}{#1}}
+\newcommand{\jaune}[1]{\textcolor{myyellow}{#1}}
+\newcommand{\violet}[1]{\textcolor{purple}{#1}}
+\newcommand{\orange}[1]{\textcolor{orange}{#1}}
+\newcommand{\doublebar}[1]{%
+\noindent
+\begin{tikzpicture}
+\node[
+  inner xsep=0em,
+  inner ysep=0.6em,
+  text width=\linewidth-2em,
+  align=left
+] (box) {#1};
+\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
+\draw[line width=0.35pt] ([xshift=-9pt]box.north west) -- ([xshift=-9pt]box.south west);
+\end{tikzpicture}
+}
+\newcommand{\simplebar}[1]{%
+\noindent
+\begin{tikzpicture}
+\node[
+  inner xsep=0em,
+  inner ysep=0.6em,
+  text width=\linewidth-2em,
+  align=left
+] (box) {#1};
+\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
+\end{tikzpicture}
+}
+\newcommand{\dx}{\mathrm dx}
+\newcommand{\dy}{\mathrm dy}
+\newcommand{\dz}{\mathrm dz}
+\newcommand{\dt}{\mathrm dt}
+
+
+
+

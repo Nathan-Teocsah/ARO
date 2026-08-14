@@ -1,0 +1,13 @@
+PWD /home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/pdfNote
+INPUT /usr/local/texlive/2025/texmf.cnf
+INPUT /usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT /home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/pdfNote/0.tex
+OUTPUT 0.log
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/article.cls
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/size12.clo
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/size12.clo
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/size12.clo
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr12.tfm

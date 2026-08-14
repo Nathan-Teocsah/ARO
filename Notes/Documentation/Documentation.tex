@@ -1,0 +1,83 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/package_perso}
+
+\begin{document}
+	\pagenumbering{gobble}
+	
+	\begin{titlepage}
+		\centering
+		
+		\vspace*{7cm}
+		
+		% Filet horizontal du haut
+		\rule{\linewidth}{0.5mm} \\[0.4cm]
+		
+		% Titre
+		{\color{bleuTitre} \Huge \bfseries Aide à la RédactiOn (ARO)} \\[0.4cm]
+		
+		% Filet horizontal du bas
+		\rule{\linewidth}{0.5mm}
+		
+		\vspace{1.5cm}
+		
+		{\Large Documentation}
+		
+		\vfill
+		
+		% Bloc Informations
+		\hfill
+		\begin{minipage}{0.45\textwidth}
+			\begin{flushright} \large
+				\textbf{Auteur :} \\
+				Nathan \textsc{HASCOËT}
+			\end{flushright}
+		\end{minipage}
+		
+		\vspace{2cm}
+		
+		% Date
+		{\large \today}
+		
+	\end{titlepage}
+	
+	\tableofcontents
+	
+	\newpage
+	
+	\pagenumbering{arabic}
+	\setcounter{page}{1}
+	
+	\section{Introduction}
+	
+	Le programme \textit{ARO.py} est un programme d'aide à la rédaction, initialement destiné à la rédaction de document latex en mathématiques, mais dans le principe il peut être utilisé pour toute type de rédaction de document latex.
+	
+	L'idée directrice d'\textit{ARO} est de pouvoir rédiger un document latex de manière non linéaire : on crée des notes qui contiennent un théorème (par exemple, ce peut aussi être, une définition, remarque, brouillon, etc.), chacune de ces notes contiennent aussi les notes qui permettent de la construire (les notes entrantes : ce sont les notes utiles pour définir ou construire le contenu de cette) et les notes qu'elle permet de construire (les notes sortantes : ce sont les notes qui utilisent le contenu de cette note).
+	
+	\section{Système requis}
+	
+	Il est nécessaire d'avoir au préalable installé \textbf{python3} sur son ordinateur pour compiler le script ARO. De plus, dans l'état actuel des choses, il est nécessaire de posséder un système Linux pour pouvoir exécuter certaines des commandes du programme.\\
+	
+	Pour le bon fonctionnement il est nécessaire de créer les dossiers et sous-dossiers (en gras) et les fichiers en italique suivants, dans le même dossier que celui contenu \textit{ARO.py} :
+	
+	\begin{enumerate}[label=$\star$]
+		\item \textit{ARO.py}
+		\item \textit{environnement}
+		\item \textbf{Notes}
+		\begin{enumerate}[label=$-$]
+			\item \textbf{doc\_chronologique}
+			\item \textbf{doc\_maitre}
+			\item \textbf{pdfLien}
+			\item \textbf{pdfNote}
+			\item \textbf{tmp}
+			\item \textit{notes}
+			\item \textit{relations}
+		\end{enumerate}
+	\end{enumerate}
+	
+	\textbf{\underline{Remarque :}} Si vous avez récupéré le dossier d'installation sur github, tous ces dossiers et fichiers seront présents, et le fichier \textit{environnement sera pré-rempli}.
+	
+	\section{Fichier de configuration : \textit{environnement}}
+	
+	Les deux autres fichiers : \textit{notes} et \textit{relations}, seront remplis automatiquement par le programme. 
+	
+\end{document}

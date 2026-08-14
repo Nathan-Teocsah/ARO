@@ -1,0 +1,63 @@
+théorème*
+le *
+note*
+\begin{theorem}*
+\end{theorem}*
+
+corolaire*
+le *
+note*
+\begin{coro}*
+\end{coro}*
+
+proposition*
+la *
+note*
+\begin{prop}*
+\end{prop}*
+
+brouillon*
+le *
+note*
+\begin{brouillon}*
+\end{brouillon}*
+
+note*
+la *
+note*
+\begin{note}*
+\end{note}*
+
+remarque*
+la *
+note*
+\begin{rmq}*
+\end{rmq}*
+
+équation*
+l'*
+note*
+\begin{equation}*
+\end{equation}*
+
+démonstration*
+la *
+note*
+\begin{proof}*
+\end{proof}*
+
+Implication*
+*
+relation*
+\begin{center}
+    $\implies$
+\end{center}*
+ implique *
+
+Equivalence*
+*
+relation*
+\begin{center}
+    $\iff$
+\end{center}*
+ est équivalentt à *
