@@ -227,7 +227,7 @@ def compile(path,filename,latex):
     
     subprocess.run(["touch", path+filename+".tex"])
     latex_entete = r"""\documentclass[12pt,a4paper]{article}
-\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/package_affichage}
+\usepackage{package_affichage}
 
 \begin{document}
 """
@@ -238,7 +238,7 @@ def compile(path,filename,latex):
     with open(path+filename+".tex", "w", encoding="utf-8") as f:
                 f.write(latex)
 
-    subprocess.run(["pdflatex", "-halt-on-error", "-output-directory=" + path, path + filename + ".tex"],
+    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
         stdout=subprocess.DEVNULL
     )
     proc = subprocess.Popen(["xpdf", "-geometry 600x200+100+100", "-z 250" , path + filename + ".pdf"])
@@ -253,7 +253,7 @@ def compile_tmp(path_tmp,editeur_latex,latex):
 
     subprocess.run(["touch", path_tmp+"tmp.tex"])
     latex_entete = r"""\documentclass[12pt,a4paper]{article}
-\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/package_affichage}
+\usepackage{package_affichage}
 
 % Ne rien écrire ici
 
@@ -278,7 +278,7 @@ def compile_maitre(path,filename,latex):
     print("Compilation en cours...")
     subprocess.run(["touch", path+filename+".tex"])
     latex_entete = r"""\documentclass[12pt,a4paper]{article}
-\usepackage{/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/Aide_a_la_redaction/Notes/package_perso}
+\usepackage{package_perso}
 
 \begin{document}
 """
@@ -289,7 +289,7 @@ def compile_maitre(path,filename,latex):
     with open(path+filename+".tex", "w", encoding="utf-8") as f:
                 f.write(latex)
 
-    subprocess.run(["pdflatex", "-halt-on-error", "-output-directory=" + path, path + filename + ".tex"],
+    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
         stdout=subprocess.DEVNULL
     )
 
