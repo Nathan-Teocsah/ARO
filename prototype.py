@@ -2,6 +2,7 @@ import numpy as np
 import copy
 import subprocess
 import random as rd
+import os
 
 # On ne peut relier plusieurs proposition qu'à une démonstration ou une remarque mais à rien d'autres
 
@@ -76,7 +77,7 @@ class note:
         Liste_rel_a_supprimer = trouve_rel(liste_relation,self.num)
         liste_relation_copy = copy.copy(liste_relation)
         for k in Liste_rel_a_supprimer :
-            liste_relation_copy[k].sup(path_pdf_rel,filename_relation,liste_relation,liste_note)
+            liste_relation_copy[k].sup(path_pdf_rel,path_note,filename_relation,liste_relation,liste_note)
 
         del liste_note[rang]
 
@@ -94,7 +95,8 @@ class note:
         with open(path_note+filename_note, "w", encoding="utf-8") as file:
             for Note in self.__Liste :
                 file.writelines(Note)
-        subprocess.Popen(["rm", "-rf", path_pdf+filename+".pdf"])
+        try: os.remove(path_pdf+filename+".pdf") 
+        except FileNotFoundError: print(f"Fichier '{path_pdf+filename+".pdf"}' introuvable.")
 
         print(f"---> suppression de-l'objet Note numéro {self.num} et des relations associées")
 
@@ -144,7 +146,7 @@ class relation:
         if self.contenu!="":
             self.__proc.terminate()
 
-    def sup(self,path_pdf,filename_relation,liste,liste_note): 
+    def sup(self,path_pdf,path_note,filename_relation,liste,liste_note): 
         num = 0
         filename = f"{self.extremite[0]},{self.extremite[1]}"
         while liste[num].extremite != self.extremite : num += 1
@@ -167,7 +169,11 @@ class relation:
         with open(filename_relation, "w", encoding="utf-8") as file:
             for Rel in self.__Liste :
                 file.writelines(Rel)
-        subprocess.Popen(["rm", "-rf", path_pdf+filename+".pdf"])
+        with open(path_note+filename_note, "w", encoding="utf-8") as file:
+            for Note in self.__Liste :
+                file.writelines(Note)
+        try: os.remove(path_pdf+filename+".pdf") 
+        except FileNotFoundError: print(f"Fichier '{path_pdf+filename+".pdf"}' introuvable.")
         print(f"---> suppression de l'objet Relation numéro {num}")
 
 
@@ -242,8 +248,11 @@ def compile(path,filename,latex):
         stdout=subprocess.DEVNULL
     )
     proc = subprocess.Popen(["xpdf", "-geometry 600x200+100+100", "-z 250" , path + filename + ".pdf"])
-    
-    subprocess.run(["rm", "-rf", path+filename+".aux", path+filename+".log", path+filename+".fls", path+filename+".out",path+filename+".fdb_latexmk",path+filename+".thm",path+filename+".fdb_latexmk"])
+
+    liste_supprimer = [".aux",".log",".out",".thm"]
+    for file in liste_supprimer :
+        try: os.remove(path+filename+file) 
+        except FileNotFoundError: print(f"Fichier '{path+filename+file}' introuvable.")
 
     return proc
 
@@ -296,10 +305,8 @@ def compile_maitre(path,filename,latex):
     subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
         stdout=subprocess.DEVNULL
     )
+
     
-    #subprocess.run(["rm", "-rf", path+filename+".aux", path+filename+".log", path+filename+".fls", path+filename+".out",path+filename+".fdb_latexmk",path+filename+".thm",path+filename+".fdb_latexmk"])
-
-
 def detect_note_loc_glob(texte,liste_note):
     liste_mot = texte.split()
     nv_texte = " "
@@ -1269,110 +1276,256 @@ def read_env(path_Note,Choix_note,liste_determinant,Choix_rel,environnement):
             environnement.append([type, debut, fin]) 
 
 
-def MENU(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,filename_relation,liste_note,liste_relation,Choix_note,Choix_rel,Protege,editeur_latex):
+def detect_project(name):
+    items = os.listdir(name) 
+    repertoire = []
+    check = ['relations', 'environnement', 'pdfLien', 'doc_maitre', 'tmp', 'pdfNote', 'notes', 'doc_chronologique',"package_perso.sty","package_affichage.sty"]
+    nb_pres = 0
+    for i in items:
+        if i in check : 
+            nb_pres += 1
+        else :
+            False
+    if nb_pres == len(check) :
+        return True
+    return False
+
+def load_project(name,filename_note,filename_relation):
+    path_Note = name + "/"
+    Choix_note = []
+    liste_determinant = []
+    Choix_rel = []
+    environnement = []
+
+    read_env(path_Note,Choix_note,liste_determinant,Choix_rel,environnement)
+
+    liste_note = []
+    liste_relation = []
+
+    print("Récupération des notes :")
+    with open(path_Note+filename_note,"r") as file :
+        ligne = file.readline()
+        while ligne != "" and ligne !="\n" :
+            liste_note.append(note(file))
+            ligne = file.readline()
+    if liste_note == [] : 
+        print("---> Aucune note")
+    print("")
+    print("Récupération des relations :")
+    with open(path_Note+filename_relation,"r") as file :
+        ligne = file.readline()
+        while ligne != "" and ligne !="\n" :
+            liste_relation.append(relation(file))
+            ligne = file.readline()
+    if liste_relation == [] : 
+        print("---> Aucune relation")
+
+    return Choix_note,liste_determinant,Choix_rel,environnement,liste_note,liste_relation
+
+
+def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,namedir_document_chrono,filename_note,filename_relation,Protege,editeur_latex):
     def trouve_rel(liste_relation,num1,num2):
         for k in range(len(liste_relation)):
             if [num1,num2] == liste_relation[k].extremite :
                 return True
         return False
-    ancien_choix = True
+
+    def create_project():
+        print("----------- CREATION D'UN PROJET -----------")
+        name = input("Nom du projet : ")
+        while os.path.exists(name):
+            print("---> Nom de dossier déjà existant")
+            name = input("Nom du projet : ")
+        os.makedirs(name)
+        items = os.listdir(".modele")
+        for i in items:
+            if os.path.isdir(".modele"+"/"+i) :
+                os.makedirs(name+"/"+i)
+            else :
+                file = open(name + "/"+i, "w")
+                file_to_copy = open(".modele" +"/" + i,"r")
+                file.write(file_to_copy.read())
+                file.close()
+                file_to_copy.close()
+            
+        print(f"---> Projet {name} créer avec succès !\n-------------------------------------------\n")
+        return name
+
     while True :
-        Choix_menu = ["Ajouter une Note.","Ajouter une relation.","Editer/Supprimer une Note.","Editer/Supprimer une relation.","Générer le document maitre.","Afficher les notes avec contenu incomplet."]
-        if len(liste_note) == 0 :
-            Choix_menu = ["Ajouter une Note."]
-        elif len(liste_note) == 1 :
-            Choix_menu = ["Ajouter une Note.","Editer/Supprimer une Note.","Générer le document de maitre."]
-        elif len(liste_relation) == 0 :
-            Choix_menu = ["Ajouter une Note.","Ajouter une relation.","Editer/Supprimer une Note.","Générer le document de maitre.","Afficher les notes avec contenu incomplet."]
-        if len(liste_note)>=1 and ancien_choix :
-            generate_doc_chrono(liste_note,path_document_chrono)
+        items = os.listdir(".")  # items = folders + files
+        repertoire = []
+        for i in items:
+            if os.path.isdir(i) and i[0] != "." and detect_project(i):
+                repertoire.append(i)
+
+        if repertoire == []:
+            print("\n---> Aucun projet détecté.\n")
+            name = create_project()
+            repertoire.append(name)
+
+        print("Projet disponible :")
+        i=1
+        for projet in repertoire :
+            print(f"{i}) {projet}")
+            i+=1
+        print(f"{i}) Créer un nouveau projet")
+        rep = int(input("\nChoix : "))
+        while rep<1 or rep>len(repertoire)+1:
+            print("--- Choix invalide ---")
+            rep = int(input("Choix : "))
+
+        if rep==len(repertoire)+1:
+            name = create_project()
+            repertoire.append(name)
+        else :
+            name = repertoire[rep-1]    
+
+            repertoire.append(name)
+        print(f"\n---------------- Chargement du projet '{name}' ----------------\n")    
+
+        Choix_note,liste_determinant,Choix_rel,environnement,liste_note,liste_relation = load_project(name,filename_note,filename_relation)
+        path_Note = name + "/"
+
+        path_pdf_Note = name + "/" + namedir_pdf_Note + "/"
+        file = open(path_pdf_Note+"package_affichage.sty", "w")
+        file_to_copy = open(name +"/" + "package_affichage.sty","r")
+        pack_aff = file_to_copy.read()
+        file.write(pack_aff)
+        file.close()
+        file_to_copy.close()
+
+        path_pdf_Lien = name + "/" + namedir_pdf_Lien +"/"
+        file = open(path_pdf_Lien+"package_affichage.sty", "w")
+        file.write(pack_aff)
+        file.close()
+
+        path_tmp = name + "/" + namedir_tmp +"/"
+        file = open(path_tmp+"package_perso.sty", "w")
+        file_to_copy = open(name +"/" + "package_perso.sty","r")
+        pack_perso = file_to_copy.read()
+        file.write(pack_perso)
+        file.close()
+        file_to_copy.close()
+
+        path_document_maitre = name + "/" + namedir_document_maitre + "/"
+        file = open(path_document_maitre+"package_perso.sty", "w")
+        file.write(pack_perso)
+        file.close()
+
+        path_document_chrono = name + "/" + namedir_document_chrono + "/"
+        file = open(path_document_chrono+"package_perso.sty", "w")
+        file.write(pack_perso)
+        file.close()
+
+        print(f"\n---------------- Projet '{name}' chargé ----------------\n")
         ancien_choix = True
+        while True :
+            creer_note = "Ajouter une Note."
+            creer_relation = "Ajouter une relation."
+            edit_note = "Editer/Supprimer une Note."
+            edit_relation = "Editer/Supprimer une relation."
+            gen_doc_maitre = "Générer le document maitre."
+            aff_incomplet = "Afficher les notes avec contenu incomplet."
+            nouv_projet = "Changer/Créer un nouveau projet"
+            Choix_menu = [creer_note,creer_relation,edit_note,edit_relation,gen_doc_maitre,aff_incomplet,nouv_projet]
+            if len(liste_note) == 0 :
+                Choix_menu = [creer_note,nouv_projet]
+            elif len(liste_note) == 1 :
+                Choix_menu = [creer_note,gen_doc_maitre,aff_incomplet,nouv_projet]
+            elif len(liste_relation) == 0 :
+                Choix_menu = [creer_note,creer_relation,edit_note,gen_doc_maitre,aff_incomplet,nouv_projet]
+            if len(liste_note)>=1 and ancien_choix :
+                generate_doc_chrono(liste_note,path_document_chrono)
+            ancien_choix = True
 
-        print("\n------- MENU -------")
-        nb_choix = len(Choix_menu)
-        for i in range(len(Choix_menu)):
-            print(f"{i+1}) {Choix_menu[i]}")
-        continuer = 1
-        while continuer==1 :
-            continuer = 0
-            num_choix = int(input("\nChoix : "))
-            if num_choix < 1 or num_choix> nb_choix :
-                continuer = 1
-                print("--- Choix invalide ---")
-        if Choix_menu[num_choix-1] == "Ajouter une Note." :
-            creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,liste_note,liste_relation,Choix_note,Choix_rel,Protege,filename_relation)
-        if Choix_menu[num_choix-1] == "Ajouter une relation.":
-            print("Note_1 --> Note_2")
-            k1 = int(input("numéro Note_1 : "))
-            k2 = int(input("numéro Note_2 : "))
-            Note1 = liste_note[k1]
-            Note2 = liste_note[k2]
-            if trouve_rel(liste_relation,Note1.num,Note2.num) :
-                print(f"---> Il existe déjà une relation Note {k1} --> Note {k2}")
-            else :
-                liste_relation.append(creer_relation_pour_note(Note1.num,Note2.num,Note1.type,liste_note,path_pdf_Lien,path_tmp,path_Note,filename_relation,Choix_rel))
-                Note1.sortie += [Note2.num]
-                Note2.entre += [Note1.num]  
-                mise_a_jour(liste_note,path_Note,filename_note)
-        if Choix_menu[num_choix-1] == "Editer/Supprimer une Note." :
-            k = int(input("Choisissez le numéro d'une note : "))
-            Note = liste_note[k]
-            rep = input("Voulez-vous éditer (e) ou supprimer (s) une note ? ")
-            if rep == "s":
-                if input("Etes vous sûr de vouloir supprimer cette note ? ")=="o":
-                    Note.sup(path_pdf_Note,path_pdf_Lien,path_Note,filename_note,filename_relation,liste_note,liste_relation)
-                    mise_a_jour(liste_note,path_Note,filename_note)
-                    mise_a_jour_rel(liste_relation,path_Note,filename_relation)
-            else :
-                edit_contenu_note(liste_note,Note.num,path_tmp,path_Note,filename_note,editeur_latex)
-        if Choix_menu[num_choix-1] == "Editer/Supprimer une relation." :
-            print("Choisir une relation Note_1 --> Note_2")
-            k1 = int(input("Numéro de Note_1 : "))
-            k2 = int(input("Numéro de Note_2 : "))
-            Note1 = liste_note[k1]
-            Note2 = liste_note[k2]
-            matching_relation = []
-            i = 0
-            for rel in liste_relation :
-                if [Note1.num,Note2.num] == rel.extremite :
-                    matching_relation.append(rel)
-                    print(f"- relation {i} de type {rel.type}")
-                i += 1
-            if len(matching_relation) == 0 :
-                print("\n---> Aucune relation détectée...")
-            else :
-                rel = matching_relation[0]
-                if len(matching_relation)>1 :
-                    continuer=True
-                    while continuer:
-                        k = int(input("Choix de la relation : "))
-                        if k<0 or k>=len(matching_relation):
-                            print("--- Choix invalide ---")
-                        else :
-                            continuer = False
-                    rel = matching_relation[k]
-                rep = input("Voulez-vous éditer (e) ou supprimer (s) cette relation ? ")
-                if rep == "s":
-                    if input("Etes vous sûr de vouloir supprimer cette relation ? ")=="o":
-                        rel.sup(path_pdf_Lien,filename_relation,liste_relation,liste_note)
-                        mise_a_jour_rel(liste_relation,path_Note,filename_relation)
-                        mise_a_jour(liste_note,path_Note,filename_note)
+            print("\n------- MENU -------")
+            nb_choix = len(Choix_menu)
+            for i in range(len(Choix_menu)):
+                print(f"{i+1}) {Choix_menu[i]}")
+            continuer = 1
+            while continuer==1 :
+                continuer = 0
+                num_choix = int(input("\nChoix : "))
+                if num_choix < 1 or num_choix> nb_choix :
+                    continuer = 1
+                    print("--- Choix invalide ---")
+            if Choix_menu[num_choix-1] == creer_note :
+                creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,liste_note,liste_relation,Choix_note,Choix_rel,Protege,filename_relation)
+            if Choix_menu[num_choix-1] == creer_relation:
+                print("Note_1 --> Note_2")
+                k1 = int(input("numéro Note_1 : "))
+                k2 = int(input("numéro Note_2 : "))
+                Note1 = liste_note[k1]
+                Note2 = liste_note[k2]
+                if trouve_rel(liste_relation,Note1.num,Note2.num) :
+                    print(f"---> Il existe déjà une relation Note {k1} --> Note {k2}")
                 else :
-                    edit_relation(rel,Note1,Note2,Choix_rel,liste_relation,path_tmp,path_Note,filename_relation,editeur_latex)
-        if Choix_menu[num_choix-1] == "Générer le document maitre." :
-            generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition,liste_determinant,Choix_note,environnement)
-            ancien_choix = False
-        if Choix_menu[num_choix-1] == "Afficher les notes avec contenu incomplet." :
-            presence = False
-            print("\nNote(s) incomplète(s) :")
-            for k in range(len(liste_note)):
-                if liste_note[k].complet == 0 :
-                    presence = True
-                    print(f"- Note {k}")
-            if not presence :
-                print("-->Toutes les notes sont complètes")
-            ancien_choix = False
-
+                    liste_relation.append(creer_relation_pour_note(Note1.num,Note2.num,Note1.type,liste_note,path_pdf_Lien,path_tmp,path_Note,filename_relation,Choix_rel))
+                    Note1.sortie += [Note2.num]
+                    Note2.entre += [Note1.num]  
+                    mise_a_jour(liste_note,path_Note,filename_note)
+            if Choix_menu[num_choix-1] == edit_note :
+                k = int(input("Choisissez le numéro d'une note : "))
+                Note = liste_note[k]
+                rep = input("Voulez-vous éditer (e) ou supprimer (s) une note ? ")
+                if rep == "s":
+                    if input("Etes vous sûr de vouloir supprimer cette note ? ")=="o":
+                        Note.sup(path_pdf_Note,path_pdf_Lien,path_Note,filename_note,filename_relation,liste_note,liste_relation)
+                        mise_a_jour(liste_note,path_Note,filename_note)
+                        mise_a_jour_rel(liste_relation,path_Note,filename_relation)
+                else :
+                    edit_contenu_note(liste_note,Note.num,path_tmp,path_Note,filename_note,editeur_latex)
+            if Choix_menu[num_choix-1] == edit_relation :
+                print("Choisir une relation Note_1 --> Note_2")
+                k1 = int(input("Numéro de Note_1 : "))
+                k2 = int(input("Numéro de Note_2 : "))
+                Note1 = liste_note[k1]
+                Note2 = liste_note[k2]
+                matching_relation = []
+                i = 0
+                for rel in liste_relation :
+                    if [Note1.num,Note2.num] == rel.extremite :
+                        matching_relation.append(rel)
+                        print(f"- relation {i} de type {rel.type}")
+                    i += 1
+                if len(matching_relation) == 0 :
+                    print("\n---> Aucune relation détectée...")
+                else :
+                    rel = matching_relation[0]
+                    if len(matching_relation)>1 :
+                        continuer=True
+                        while continuer:
+                            k = int(input("Choix de la relation : "))
+                            if k<0 or k>=len(matching_relation):
+                                print("--- Choix invalide ---")
+                            else :
+                                continuer = False
+                        rel = matching_relation[k]
+                    rep = input("Voulez-vous éditer (e) ou supprimer (s) cette relation ? ")
+                    if rep == "s":
+                        if input("Etes vous sûr de vouloir supprimer cette relation ? ")=="o":
+                            rel.sup(path_pdf_Lien,filename_relation,liste_relation,liste_note)
+                            mise_a_jour_rel(liste_relation,path_Note,filename_relation)
+                            mise_a_jour(liste_note,path_Note,filename_note)
+                    else :
+                        edit_relation(rel,Note1,Note2,Choix_rel,liste_relation,path_tmp,path_Note,filename_relation,editeur_latex)
+            if Choix_menu[num_choix-1] == gen_doc_maitre :
+                generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition,liste_determinant,Choix_note,environnement)
+                ancien_choix = False
+            if Choix_menu[num_choix-1] == aff_incomplet :
+                presence = False
+                print("\nNote(s) incomplète(s) :")
+                for k in range(len(liste_note)):
+                    if liste_note[k].complet == 0 :
+                        presence = True
+                        print(f"- Note {k}")
+                if not presence :
+                    print("-->Toutes les notes sont complètes")
+                ancien_choix = False
+            if Choix_menu[num_choix-1] == nouv_projet :
+                print("------------------- Changement de projet -------------------------\n")
+                break
+            
 
 
 '''********************************************************************************************************
@@ -1381,12 +1534,11 @@ def MENU(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,filename_r
 
 filename_note = "notes"
 filename_relation = "relations"
-path_pdf_Note = "Notes/pdfNote/"
-path_pdf_Lien = "Notes/pdfLien/"
-path_Note = "Notes/"
-path_tmp = "Notes/tmp/"
-path_document_maitre = "Notes/doc_maitre/"
-path_document_chrono = "Notes/doc_chronologique/"
+namedir_pdf_Note = "pdfNote"
+namedir_pdf_Lien = "pdfLien"
+namedir_tmp = "tmp"
+namedir_document_maitre = "doc_maitre"
+namedir_document_chrono = "doc_chronologique"
 editeur_latex = "texstudio"
 
 Choix_note = []
@@ -1394,25 +1546,7 @@ liste_determinant = []
 Choix_rel = []
 environnement = []
 
-read_env(path_Note,Choix_note,liste_determinant,Choix_rel,environnement)
-
 Protege = ["théorème", "corolaire", "proposition"]
 liste_transition = ["il suit ", "il vient "]
 
-liste_note = []
-liste_relation = []
-
-print("-------------------- RECUPERATION des NOTES ---------------------------")
-with open(path_Note+filename_note,"r") as file :
-    ligne = file.readline()
-    while ligne != "" and ligne !="\n" :
-        liste_note.append(note(file))
-        ligne = file.readline()
-print("-------------------- RECUPERATION des RELATIONS ---------------------------")
-with open(path_Note+filename_relation,"r") as file :
-    ligne = file.readline()
-    while ligne != "" and ligne !="\n" :
-        liste_relation.append(relation(file))
-        ligne = file.readline()
-
-MENU(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,filename_relation,liste_note,liste_relation,Choix_note,Choix_rel,Protege,editeur_latex)
+MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,namedir_document_chrono,filename_note,filename_relation,Protege,editeur_latex)

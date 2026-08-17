@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  14 AUG 2026 15:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  17 AUG 2026 08:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -23,7 +23,7 @@ File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 \belowcaptionskip=\skip50
 \bibindent=\dimen148
 )
-(/home/maenwe/Documents/Carnet_a_idee/Idee_en_bazar/ARO/package_perso.sty
+(./package_perso.sty
 (/usr/local/texlive/2025/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks17
@@ -1409,7 +1409,7 @@ File: pstricks.tex 2025/06/11 v3.22 `PSTricks' (tvz,hv)
 `pst-fp' v0.06, 2020/11/20 (hv))
 File: pst-fp.tex 2020/11/20 v0.06 `PST-fp' (hv)
 )
-\c@thm=\count468
+\c@theorem=\count468
 \c@lm=\count469
 )
 Package french3.ldf Info: Setting StandardItemizeEnv=true for
@@ -1622,7 +1622,7 @@ LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
 LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
 
 [2] [3]
-runsystem(latexminted cleantemp  --timestamp 20260814155953 5B6CF869265C13AF856
+runsystem(latexminted cleantemp  --timestamp 20260817082143 5B6CF869265C13AF856
 6F192B4AB3D2A)...executed safely (allowed).
 
  (./Documentation.aux)
@@ -1634,10 +1634,10 @@ Package rerunfilecheck Info: File `Documentation.out' has not changed.
 (rerunfilecheck)             Checksum: 6AED23B12DCED4C0AD37929AC1053C92;1313.
  ) 
 Here is how much of TeX's memory you used:
- 51754 strings out of 467538
- 1244124 string characters out of 5419551
- 1928484 words of memory out of 5000000
- 79793 multiletter control sequences out of 15000+600000
+ 51751 strings out of 467538
+ 1243761 string characters out of 5419551
+ 1928441 words of memory out of 5000000
+ 79791 multiletter control sequences out of 15000+600000
  687193 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  125i,5n,135p,742b,645s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1649,7 +1649,7 @@ fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1
 /public/lm/lmr17.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/
 lmri12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
 >
-Output written on Documentation.pdf (5 pages, 159314 bytes).
+Output written on Documentation.pdf (5 pages, 159436 bytes).
 PDF statistics:
  176 PDF objects out of 1000 (max. 8388607)
  127 compressed objects within 2 object streams
