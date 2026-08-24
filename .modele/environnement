@@ -1,3 +1,9 @@
+définition*
+la *
+note*
+\begin{definition}*
+\end{definition}*
+
 théorème*
 le *
 note*
@@ -15,6 +21,12 @@ la *
 note*
 \begin{prop}*
 \end{prop}*
+
+lemme*
+le *
+note*
+\begin{lm}*
+\end{lm}*
 
 brouillon*
 le *
@@ -45,6 +57,12 @@ la *
 note*
 \begin{proof}*
 \end{proof}*
+
+texte*
+le *
+note*
+\begin{texte}*
+\end{texte}*
 
 Implication*
 *

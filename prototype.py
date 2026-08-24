@@ -244,11 +244,9 @@ def compile(path,filename,latex):
     with open(path+filename+".tex", "w", encoding="utf-8") as f:
                 f.write(latex)
 
-    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
-        stdout=subprocess.DEVNULL
-    )
+    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"])
     proc = subprocess.Popen(["xpdf", "-geometry 600x200+100+100", "-z 250" , path + filename + ".pdf"])
-
+    print("\n---> Fin compilation")
     liste_supprimer = [".aux",".log",".out",".thm"]
     for file in liste_supprimer :
         try: os.remove(path+filename+file) 
@@ -276,9 +274,9 @@ def compile_tmp(path_tmp,editeur_latex,latex):
     with open(path_tmp+"tmp.tex", "w", encoding="utf-8") as f:
                 f.write(latex)
 
-    proc = subprocess.Popen([editeur_latex, path_tmp + "tmp.tex"],
-        stdout=subprocess.DEVNULL
-    )
+    proc = subprocess.Popen([editeur_latex, path_tmp + "tmp.tex"])
+
+    print("---> Fin compilation")
     input("Si vous avez terminé l'édition, appuyer sur entrée pour valider les modification.")
     proc.terminate()
 
@@ -298,13 +296,13 @@ def compile_maitre(path,filename,latex):
     with open(path+filename+".tex", "w", encoding="utf-8") as f:
                 f.write(latex)
 
-    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
-        stdout=subprocess.DEVNULL
+    subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"]
     )
 
     subprocess.run(["pdflatex", "-output-directory=" + path, path + filename + ".tex"],
         stdout=subprocess.DEVNULL
     )
+    print("\n---> Fin compilation")
 
     
 def detect_note_loc_glob(texte,liste_note):
@@ -490,7 +488,7 @@ def detect_note(texte,liste_note,liste_determinant,Choix_note):
     return nv_texte
 
 
-def edit_contenu_note(liste_note,num_note,path_tmp,path_note,filename_note,editeur_latex):
+def edit_contenu_note(liste_note,Choix_note,num_note,path_tmp,path_note,filename_note,editeur_latex):
     def trouve(liste_note,num):
         for k in range(len(liste_note)):
             if liste_note[k].num == num :
@@ -499,21 +497,51 @@ def edit_contenu_note(liste_note,num_note,path_tmp,path_note,filename_note,edite
 
     k0 = trouve(liste_note,num_note)
     latex = liste_note[k0].contenu
-    compile_tmp(path_tmp,editeur_latex,latex)
-    print("---> Récupération du nouveau texte...")
-    latex = ""
-    with open(path_tmp+"tmp.tex","r") as file :
-        ligne = file.readline()
-        while r"\end{document}" not in ligne :
-            if r"\begin{document}" in ligne :
-                latex = ""
-            else:
-                latex += ligne
-            ligne = file.readline()
-    liste_note[k0].contenu = latex
-    print("---> Texte récupéré !")
-    print("---> Mise à jour en cours... ")
-    mise_a_jour(liste_note,path_note,filename_note)
+
+    while True:
+        print("Que souhaitez vous modifiez pour cette note ?")
+        print("1) Type.")
+        print("2) Contenu complet ?")
+        print("3) Son contenu.")
+        continuer = True
+        while continuer :
+            rep = int(input("Réponse : "))
+            if rep>=1 and rep <=3 :
+                continuer = False
+            else : 
+                print("--- Choix invalide ---")
+        if rep == 1:
+            print("Choix du type :")
+            for i in range(len(Choix_note)):
+                print(f"{i+1}) {Choix_note[i]}")
+            num_type = int(input("Choix : "))
+            while num_type < 0 or num_type > len(Choix_note):
+                print("--- Choix invalide ---")
+                num_type = input("Choix : ")
+            liste_note[k0].type = Choix_note[num_type-1]
+
+        if rep == 2 :
+            liste_note[k0].complet = 0 if input("Le contenu est-il complet ? ")=="n" else 1
+        
+        if rep == 3 :
+            compile_tmp(path_tmp,editeur_latex,latex)
+            print("---> Récupération du nouveau texte...")
+            latex = ""
+            with open(path_tmp+"tmp.tex","r") as file :
+                ligne = file.readline()
+                while r"\end{document}" not in ligne :
+                    if r"\begin{document}" in ligne :
+                        latex = ""
+                    else:
+                        latex += ligne
+                    ligne = file.readline()
+            liste_note[k0].contenu = latex
+            print("---> Texte récupéré !")
+
+        print("---> Mise à jour en cours... ")
+        mise_a_jour(liste_note,path_note,filename_note)
+        if input("Voulez vous continuer à éditer cette note ? ")!="o" :
+            break
 
 def edit_relation(rel,Note1,Note2,Choix_rel,liste_relation,path_tmp,path_note,filename_relation,editeur_latex):
     while True :
@@ -689,7 +717,7 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
     filename = str(note.nb)
     Choix = copy.deepcopy(Choix_note)
 
-    if len(liste_note)!= 0:
+    if len(liste_note)!= 1:
         entre_loc = input("Impliquation de qui ? ").split()
         entre_glob = [liste_note[int(e)].num for e in entre_loc]
         entre = " ".join(map(str,entre_glob))
@@ -698,7 +726,9 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         sortie_glob = [liste_note[int(s)].num for s in sortie_loc]
         sortie = " ".join(map(str,sortie_glob))
     else :
+        entre_loc = ""
         entre = ""
+        sortie_loc = ""
         sortie = ""
     protege_active = False
     for num in (entre+" "+sortie).split():
@@ -710,12 +740,7 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         for type in Protege:
             Choix.remove(type)
     ok=False
-    while not ok :
-        type = choix_type(Choix)
-        if protege_active and type in Protege :
-            print("---> "+type+" ne peut à être associé à une Note parmi les types suivants :\n"+", ".join(Protege))
-        else :
-            ok=True
+    type = choix_type(Choix)
     latex = choix_description(path_tmp)
     complet = 0 if input("La description est-elle complète ? (o/n) ")=="n" else 1
     if latex != "" or latex != "\n":
@@ -1037,7 +1062,9 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
                         if Note.type == "équation" :
                             latex += indentation(retire_dollar(Note.contenu))
                         else :
-                            latex += detect_note(Note.contenu,liste_note,liste_determinant,Choix_note)
+                            latex += r"\noindent " + detect_note(Note.contenu,liste_note,liste_determinant,Choix_note)
+                        if environnement[i][1] == "" or (not pres_note and not protege) :
+                            latex += r"\\"
                         if environnement[i][2] != "" :
                             latex += "\n"
 
@@ -1077,7 +1104,7 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
                 k1=trouve_note(liste_note,Num_utilise_prerequis[0])
                 latex += r"\noindent L'équation "+ref_env(liste_note[k1])+" est équivalente à "
             k_num = trouve_note(liste_note,num)
-            latex += determinant(liste_note[k_num].type,liste_determinant,Choix_note) + liste_note[k_num].type + ref_env(liste_note[k_num]) + ".\n"
+            latex += determinant(liste_note[k_num].type,liste_determinant,Choix_note) + liste_note[k_num].type + " " + ref_env(liste_note[k_num]) + ".\n"
             return latex
         
         k_prec=-1
@@ -1091,7 +1118,7 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
                     dernier_num = max(liste_note[k0].entre)+1
                 if k_prec != -1 and [dernier_num] == liste_note[k0].entre :
                     k_rel = trouve_rel(num,liste_note[k_prec].num,liste_relation)
-                    latex += creer_env(liste_relation[k_rel]) + "\n"
+                    latex += creer_env(liste_relation[k_rel]) +"\n"
                 liste_prerequis=[]
                 pre_requis(liste_note,num,liste_prerequis)
                 Num_utilise_prerequis = []
@@ -1158,7 +1185,7 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
                                     utilise.append(n)
 
                                     
-                if len(liste_note[k0].entre) > 1 or (dernier_num not in liste_note[k0].entre and liste_note[k0].entre != []):
+                if [dernier_num] != liste_note[k0].entre and liste_note[k0].entre != [] :
                     latex += texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,liste_note[k0].entre,num)
 
                 Note = liste_note[k0]
@@ -1241,9 +1268,12 @@ def read_env(path_Note,Choix_note,liste_determinant,Choix_rel,environnement):
             nature = ""
             debut = ""
             fin = ""
+            i = 1
+            i_changement = 1
             while ligne=="\n" :
                 ligne = file.readline()
-            while num_ligne <= 4:
+                i += 1
+            while num_ligne <= 4 and ligne != "":
                 if num_ligne == 0 :
                     if type!="":
                         type += "_"
@@ -1265,8 +1295,13 @@ def read_env(path_Note,Choix_note,liste_determinant,Choix_rel,environnement):
 
                 if (ligne.rstrip('\n'))[-1]=="*":
                     num_ligne += 1  
+                    i_changement = i
                     
                 ligne = file.readline() 
+                i += 1
+
+            if num_ligne <= 3 :
+                raise ValueError(f"Erreur lors de la lecture du fichier environnement à la ligne {i_changement}")
 
             if nature == "note":
                 Choix_note.append(type)
@@ -1431,7 +1466,7 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
             if len(liste_note) == 0 :
                 Choix_menu = [creer_note,nouv_projet]
             elif len(liste_note) == 1 :
-                Choix_menu = [creer_note,gen_doc_maitre,aff_incomplet,nouv_projet]
+                Choix_menu = [creer_note,edit_note,gen_doc_maitre,aff_incomplet,nouv_projet]
             elif len(liste_relation) == 0 :
                 Choix_menu = [creer_note,creer_relation,edit_note,gen_doc_maitre,aff_incomplet,nouv_projet]
             if len(liste_note)>=1 and ancien_choix :
@@ -1474,7 +1509,7 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
                         mise_a_jour(liste_note,path_Note,filename_note)
                         mise_a_jour_rel(liste_relation,path_Note,filename_relation)
                 else :
-                    edit_contenu_note(liste_note,Note.num,path_tmp,path_Note,filename_note,editeur_latex)
+                    edit_contenu_note(liste_note,Choix_note,Note.num,path_tmp,path_Note,filename_note,editeur_latex)
             if Choix_menu[num_choix-1] == edit_relation :
                 print("Choisir une relation Note_1 --> Note_2")
                 k1 = int(input("Numéro de Note_1 : "))
