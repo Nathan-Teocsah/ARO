@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  17 AUG 2026 08:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.18)  6 SEP 2026 11:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1604,25 +1604,26 @@ l.45 	\newpage
                [1]
 Package marginnote Info: Using workaround for absolute page number on input lin
 e 45.
- [1{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/l
-ocal/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 89.
+
+
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 90.
+
+[1{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/lo
+cal/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}]
 Package marginnote Info: Using workaround for absolute page number on input lin
-e 87.
+e 91.
 
 
-LaTeX Warning: Command \textbackslash invalid in math mode on input line 93.
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 92.
 
 
-LaTeX Warning: Command \textbackslash invalid in math mode on input line 94.
-
-
-LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
-
-
-LaTeX Warning: Command \textbackslash invalid in math mode on input line 96.
+LaTeX Warning: Command \textbackslash invalid in math mode on input line 92.
 
 [2] [3]
-runsystem(latexminted cleantemp  --timestamp 20260817082143 5B6CF869265C13AF856
+runsystem(latexminted cleantemp  --timestamp 20260906110855 5B6CF869265C13AF856
 6F192B4AB3D2A)...executed safely (allowed).
 
  (./Documentation.aux)
@@ -1649,7 +1650,7 @@ fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1
 /public/lm/lmr17.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/
 lmri12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
 >
-Output written on Documentation.pdf (5 pages, 159436 bytes).
+Output written on Documentation.pdf (5 pages, 158368 bytes).
 PDF statistics:
  176 PDF objects out of 1000 (max. 8388607)
  127 compressed objects within 2 object streams

@@ -55,16 +55,13 @@
 	
 	\section{Système requis}
 	
-	Il est nécessaire d'avoir au préalable installé \textbf{python3} et \textbf{xpdf} sur son ordinateur pour exécuter le script ARO. De plus, dans l'état actuel des choses, il est nécessaire de posséder un système Linux pour pouvoir exécuter certaines des commandes du programme.
+	Il est nécessaire d'avoir au préalable installé \textbf{python3} et en option \textbf{xpdf} (sert à visualiser les pdf que l'on vient de générer mais peut fonctionner sans) sur son ordinateur pour exécuter le script ARO.
 	
-	Pour le bon fonctionnement il est nécessaire de créer les dossiers et sous-dossiers (en gras) et les fichiers en italique suivants, dans le même dossier que celui contenu \textit{ARO.py} :
+	Pour le bon fonctionnement il est nécessaire de garder le dossier \textit{.modele} qui contient toutes les informations nécessaires à la création d'un projet :
 	
 	\begin{enumerate}[label=$\star$]
 		\item \textit{ARO.py}
-		\item \textit{environnement}
-		\item \textit{package\_perso.sty}
-		\item \textit{package\_affichage.sty}
-		\item \textbf{Notes}
+		\item \textbf{.modele}
 		\begin{enumerate}[label=$-$]
 			\item \textbf{doc\_chronologique}
 			\item \textbf{doc\_maitre}
@@ -73,12 +70,11 @@
 			\item \textbf{tmp}
 			\item \textit{notes}
 			\item \textit{relations}
+			\item \textit{environnement}
+			\item \textit{package\_perso.sty}
+			\item \textit{package\_affichage.sty}
 		\end{enumerate}
 	\end{enumerate}
-	
-	Seul les fichiers \textit{environnement}, \textit{package\_perso.sty} et \textit{package\_affichage.sty} sont les seuls fichiers à remplir soit même.
-	
-	\textbf{\underline{Remarque :}} Si vous avez récupéré le dossier d'installation sur github, tous ces dossiers et fichiers seront présents, et les fichiers \textit{environnement}, \textit{package\_perso.sty} et \textit{package\_affichage.sty} seront pré-rempli.
 	
 	\section{Configuration}	
 	
@@ -97,7 +93,7 @@
 	
 	\subsection{Package latex : \textit{package\_perso.sty} et \textit{package\_affichage.sty}}
 	
-	Ces deux packages permettent de compiler les fichiers latex généré, ceux fournis sont très dense car ce sont ceux que j'utilise personnellement mais ils peuvent être considérablement simplifié et ne contenir que ce qu'il faut pour créer les environnements prédéfinis 
+	Ces deux packages permettent de compiler les fichiers latex généré, ceux fournis sont très dense car ce sont ceux que j'utilise personnellement mais ils peuvent être considérablement simplifié et ne contenir que ce qu'il faut pour créer les environnements décris dans le fichier \textit{environnement}.
 	
 	
 	\section{Fonctionnement général}
