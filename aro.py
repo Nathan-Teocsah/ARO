@@ -654,7 +654,7 @@ def choix_description(path_tmp):
             if reponse !=":q":
                 latex += "\n"
             repondu = 1
-    return latex
+    return latex,reponse
 
 
 def creer_relation_pour_note(Note1,Note2,type_Note,liste_note,path_pdf_lien,path_tmp,path_Note,filename_relation,Choix_rel):
@@ -681,12 +681,12 @@ def creer_relation_pour_note(Note1,Note2,type_Note,liste_note,path_pdf_lien,path
     if type1 == "équation" and type2 == "équation":
         protege_équation=True
     if not protege_équation :
-        contenu = choix_description(path_tmp)
+        contenu,reponse = choix_description(path_tmp)
     else :
         contenu = ""
-    if contenu != "" and contenu != "\n":
+    if contenu != "" and contenu != "\n" and reponse!="e":
         proc = compile(path_pdf_lien,f"{Note1},{Note2}",contenu)
-    else : 
+    elif reponse != "e":
         contenu = ""
     while True :
         reponse = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
@@ -699,14 +699,15 @@ def creer_relation_pour_note(Note1,Note2,type_Note,liste_note,path_pdf_lien,path
         print("-------- Fin Relation -----------")
         if input("Voulez vous modifier le statut de cette relation (définie ou pas) ? (o/n) ")=="o": claire = 0 if input("\nLa relation entre ces 2 noeuds est elle bien définie (justifé) ? (o/n) ")=="n" else 1
         if input("Voulez vous modifier le type ? (o/n) ")=="o": type = choix_type(Choix)
-        if type!=Choix[0]:
-            if input("Voulez vous modifier la description ? (o/n) ")=="o": contenu = choix_description(path_tmp)
-            proc.terminate()
-            if contenu != "" or contenu != "\n" :
-                proc = compile(path_pdf_lien,f"{Note1},{Note2}",contenu)
-        else : 
+        if not protege_équation :
+            contenu,reponse = choix_description(path_tmp)
+        else :
             contenu = ""
-    if contenu!="":
+        if contenu != "" and contenu != "\n" and reponse!="e":
+            proc = compile(path_pdf_lien,f"{Note1},{Note2}",contenu)
+        elif reponse != "e":
+            contenu = ""
+    if contenu and reponse != "e":
         proc.terminate()
     return relation(path_Note+filename_relation,[extremite,claire,type,detect_note_loc_glob(contenu,liste_note)])
 
@@ -741,11 +742,13 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         for type in Protege:
             Choix.remove(type)
     type = choix_type(Choix)
-    latex = choix_description(path_tmp)
+    latex,reponse = choix_description(path_tmp)
     complet = 0 if input("La description est-elle complète ? (o/n) ")=="n" else 1
-    if latex != "" or latex != "\n":
+    if latex != "" and latex != "\n" and reponse != "e" :
         print("---> Visualisation de la description...")
         proc = compile(path_pdf_Note,filename,latex)
+    elif reponse != e :
+        latex=""
     while True :
         reponse = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
         if reponse!="o": break
@@ -758,7 +761,7 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         print("Implique qui ? ",sortie_loc)
         print("-------- Fin Note -----------")
         if input("Voulez vous modifier le type ? (o/n) ")=="o": type = choix_type(Choix)
-        if input("Voulez vous modifier la description ? (o/n) ")=="o": latex = choix_description(path_tmp)
+        if input("Voulez vous modifier la description ? (o/n) ")=="o": latex,reponse = choix_description(path_tmp)
         if input("Voulez vous le statut de la description (complet ou pas) ? (o/n) ")=="o": complet = 0 if input("La description est-elle complète ? (o/n) ")=="n" else 1
         if input("Voulez vous modifier de qui est-ce impliqué ? (o/n) ")=="o": entre_loc = input("Impliquation de qui ? ").split()
         if input("Voulez vous modifier qui ça implique ? (o/n) ")=="o": sortie_loc = input("Implique qui ? ").split()
@@ -767,9 +770,11 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         sortie_glob = [liste_note[int(s)].num for s in sortie_loc]
         sortie = " ".join(map(str,sortie_glob))
         proc.terminate()
-        if latex != "" or latex != "\n":
+        if latex != "" and latex != "\n" and reponse != "e" :
             print("---> Visualisation de la description...")
             proc = compile(path_pdf_Note,filename,latex)
+        elif reponse != e :
+            latex=""
     proc.terminate()
     rel = []
     if entre != "":
@@ -1244,7 +1249,7 @@ def generate_doc_chrono(liste_note,path_Note_chrono):
         latex += r"\begin{enumerate}[label=$-$]" + "\n"
         latex += r"\item" + " Type : " + note.type + "\n"
         latex += r"\item" + " Contenu complet ? " + ("Oui" if note.complet==1 else "Non") + "\n"
-        latex += r"\item" + " Contenu :" + r"\\" + "\n" + r"\hspace*{.5cm}\begin{minipage}{20cm}" + "\n" + indentation(detect_note_glob_loc(note.contenu,liste_note)) + "\n" + r"\end{minipage}" + "\n"
+        latex += r"\item" + " Contenu :" + r"\\" + "\n" + r"\hspace*{.5cm}\begin{minipage}{15cm}" + "\n" + indentation(detect_note_glob_loc(note.contenu,liste_note)) + "\n" + r"\end{minipage}" + "\n"
         latex += r"\item" + " Note(s) qui l'implique : " 
         latex += ", ".join(map(str,[trouve_note(liste_note,num) for num in note.entre])) if note.entre!=[] else "-"
         latex += "\n" + r"\item" + " Note(s) qu'elle implique : " 
