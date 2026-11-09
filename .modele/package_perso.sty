@@ -82,11 +82,11 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\enc}[3][\textwidth]{
-  \begin{minipage}{#1}%
-    \begin{tcolorbox}[colback=white, colframe=#2, arc=1mm, boxrule=1pt]%
-      #3%
-    \end{tcolorbox}%
-  \end{minipage}%
+	\begin{minipage}{#1}%
+		\begin{tcolorbox}[colback=white, colframe=#2, arc=1mm, boxrule=1pt]%
+			#3%
+		\end{tcolorbox}%
+	\end{minipage}%
 }
 \newcommand*\abs[1]{\left\lvert #1 \right\rvert}
 \newcommand{\rouge}[1]{\textcolor{red}{#1}}
@@ -98,29 +98,29 @@
 \newcommand{\violet}[1]{\textcolor{purple}{#1}}
 \newcommand{\orange}[1]{\textcolor{orange}{#1}}
 \newcommand{\doublebar}[1]{%
-\noindent
-\begin{tikzpicture}
-\node[
-  inner xsep=0em,
-  inner ysep=0.6em,
-  text width=\linewidth-2em,
-  align=left
-] (box) {#1};
-\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
-\draw[line width=0.35pt] ([xshift=-9pt]box.north west) -- ([xshift=-9pt]box.south west);
-\end{tikzpicture}
+	\noindent
+	\begin{tikzpicture}
+		\node[
+		inner xsep=0em,
+		inner ysep=0.6em,
+		text width=\linewidth-2em,
+		align=left
+		] (box) {#1};
+		\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
+		\draw[line width=0.35pt] ([xshift=-9pt]box.north west) -- ([xshift=-9pt]box.south west);
+	\end{tikzpicture}
 }
 \newcommand{\simplebar}[1]{%
-\noindent
-\begin{tikzpicture}
-\node[
-  inner xsep=0em,
-  inner ysep=0.6em,
-  text width=\linewidth-2em,
-  align=left
-] (box) {#1};
-\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
-\end{tikzpicture}
+	\noindent
+	\begin{tikzpicture}
+		\node[
+		inner xsep=0em,
+		inner ysep=0.6em,
+		text width=\linewidth-2em,
+		align=left
+		] (box) {#1};
+		\draw[line width=0.35pt] ([xshift=-6pt]box.north west) -- ([xshift=-6pt]box.south west);
+	\end{tikzpicture}
 }
 \newcommand{\dx}{\mathrm dx}
 \newcommand{\dy}{\mathrm dy}
@@ -138,7 +138,11 @@
 \newtheorem{brouillon}{Brouillon}
 \newtheorem{note}{Note}
 \newtheorem{texte}{Texte}
-
-
-
-
+\newcounter{hyp}
+\newenvironment{hyp}[1][]
+{\refstepcounter{hyp}\par\medskip\noindent\textbf{Hypothèse \thehyp #1 :}\rmfamily\ignorespaces}
+{\medskip}
+\newcounter{dem}
+\newenvironment{dem}[1][]
+{\refstepcounter{dem}\par\medskip\noindent\textbf{Démonstration  \thedem:}\rmfamily\ignorespaces}
+{\hfill\(\square\)\medskip}

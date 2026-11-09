@@ -1,3 +1,9 @@
+hypothèse*
+l'*
+note*
+\begin{hyp}*
+\end{hyp}*
+
 définition*
 la *
 note*
@@ -55,8 +61,8 @@ note*
 démonstration*
 la *
 note*
-\begin{proof}*
-\end{proof}*
+\begin{dem}*
+\end{dem}*
 
 texte*
 le *

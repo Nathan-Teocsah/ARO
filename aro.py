@@ -189,7 +189,7 @@ class relation:
 
 
 '''******************************************************************************************************************
-        Fonction nescaire à la compilation et la création des pdf et de la récupération des donnée utilisateur 
+        Fonction nescessaire à la compilation et la création des pdf et de la récupération des donnée utilisateur 
 *********************************************************************************************************************'''
 
 def mise_a_jour(liste_note,path_note,filename_note):
@@ -422,6 +422,46 @@ def detect_note_glob_loc(texte,liste_note):
     return nv_texte
 
 
+def detect_num_note_glob_loc(texte,liste_note):
+    # détecte si une note contient une référence à d'autres autres notes et renvoie la liste de ces notes
+    liste_mot = texte.split()
+    Num=[]
+    for n in range(len(liste_mot)):
+        mot = liste_mot[n]
+        if "::" in mot :
+            start = False
+            compte = 0
+            k = ""
+            k_complet = False
+            end = False
+            for i in range(len(mot)) :
+                if not start :
+                    if mot[i] == ":" :
+                        compte += 1
+                    else : 
+                        break
+                    if compte == 2 :
+                        compte = 0
+                        start = True
+                elif mot[i].isdigit() and not k_complet :
+                    k += mot[i]
+                elif not end :
+                    k_complet = True
+                    if mot[i] == ":" :
+                        compte += 1
+                    elif compte<2 :
+                        break
+                    if compte == 2 :
+                        end = True
+                else :
+                    if k != "" :
+                        Num.append(trouve_note(liste_note,int(k)))
+                        k = ""
+            if k != "" and start and end :
+                Num.append(trouve_note(liste_note,int(k)))
+    return Num
+
+
 def determinant(Type,liste_determinant,Choix_note):
     for i in range(len(Choix_note)):
         if Type == Choix_note[i]:
@@ -611,7 +651,7 @@ def edit_relation(rel,Note1,Note2,Choix_rel,liste_relation,path_tmp,path_note,fi
     
 
 def choix_type(Choix):
-    New_Choix = Choix.copy()
+    New_Choix = sorted(Choix.copy())
     New_Choix.append("Arrêt du programme")
     print("\n--------------------------------")
     print("Choix possible :")
@@ -689,8 +729,8 @@ def creer_relation_pour_note(Note1,Note2,type_Note,liste_note,path_pdf_lien,path
     elif reponse != "e":
         contenu = ""
     while True :
-        reponse = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
-        if reponse!="o": break
+        refaire = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
+        if refaire!="o": break
         print("\n-------- Relation -----------")
         print("Claire ? ","oui" if claire else "non")
         print("Type : ",type)
@@ -747,11 +787,11 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
     if latex != "" and latex != "\n" and reponse != "e" :
         print("---> Visualisation de la description...")
         proc = compile(path_pdf_Note,filename,latex)
-    elif reponse != e :
+    elif reponse != "e" :
         latex=""
     while True :
-        reponse = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
-        if reponse!="o": break
+        refaire = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
+        if refaire!="o": break
         print("\n-------- Note -----------")
         print("Type : ",type)
         print("Description :\n")
@@ -769,13 +809,15 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         entre = " ".join(map(str,entre_glob))
         sortie_glob = [liste_note[int(s)].num for s in sortie_loc]
         sortie = " ".join(map(str,sortie_glob))
-        proc.terminate()
+        if latex != "" and latex != "\n" and reponse != "e" :
+            proc.terminate()
         if latex != "" and latex != "\n" and reponse != "e" :
             print("---> Visualisation de la description...")
             proc = compile(path_pdf_Note,filename,latex)
-        elif reponse != e :
+        elif reponse != "e" :
             latex=""
-    proc.terminate()
+    if latex != "" and latex != "\n" and reponse != "e" :
+            proc.terminate()
     rel = []
     if entre != "":
         print("\n-------------------- relations entrantes --------------------------")
@@ -795,6 +837,104 @@ def creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,list
         mise_a_jour(liste_note,path_Note,filename_note)
     liste_note.append(note(path_Note+filename_note,[type,complet,detect_note_loc_glob(latex,liste_note),[int(x) for x in entre.split()],[int(x) for x in sortie.split()]]))
     liste_relation += rel
+
+
+def inserer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,liste_note,liste_relation,Choix_note,Choix_rel,Protege,filename_relation):
+
+    def trouve_rel(num,num_implique,liste_relation):
+        for k in range(len(liste_relation)):
+            if num in liste_relation[k].extremite and num_implique in liste_relation[k].extremite :
+                return k
+        raise ValueError(f"trouve_rel pour num = {num} et num_implique = {num_implique} dans generate_doc")
+
+    print(f"-------------------- CREATION DE LA NOTE {note.nb} -------------------")
+
+    filename = str(note.nb)
+    Choix = copy.deepcopy(Choix_note)
+
+    entre_loc = input("Impliquation de qui ? ").split()
+    entre_glob = [liste_note[int(e)].num for e in entre_loc]
+    entre = " ".join(map(str,entre_glob))
+
+    sortie_loc = input("Implique qui ? ").split()
+    sortie_glob = [liste_note[int(s)].num for s in sortie_loc]
+    sortie = " ".join(map(str,sortie_glob))
+
+    for num_entre in entre_glob :
+        for num_sortie in sortie_glob:
+            k_rel = trouve_rel(num_entre,num_sortie,liste_relation)
+            k0 = trouve_note(liste_note,num_entre)
+            k1 = trouve_note(liste_note,num_sortie)
+            liste_note[k0].sortie.remove(num_sortie)
+            liste_note[k1].entre.remove(num_entre)
+            del liste_relation[k_rel]
+
+    protege_active = False
+    for num in (entre+" "+sortie).split():
+        k_num = trouve_note(liste_note,int(num))
+        if liste_note[k_num].type in Protege :
+            protege_active = True
+            break
+    if protege_active :
+        for type in Protege:
+            Choix.remove(type)
+    type = choix_type(Choix)
+    latex,reponse = choix_description(path_tmp)
+    complet = 0 if input("La description est-elle complète ? (o/n) ")=="n" else 1
+    if latex != "" and latex != "\n" and reponse != "e" :
+        print("---> Visualisation de la description...")
+        proc = compile(path_pdf_Note,filename,latex)
+    elif reponse != "e" :
+        latex=""
+    while True :
+        refaire = input("\nVoulez-vous modifier vos réponses ? (o/n) ")
+        if refaire!="o": break
+        print("\n-------- Note -----------")
+        print("Type : ",type)
+        print("Description :\n")
+        print(latex)
+        print("Complet ? "+"oui" if complet else "non")
+        print("Implication de qui ? ",entre_loc)
+        print("Implique qui ? ",sortie_loc)
+        print("-------- Fin Note -----------")
+        if input("Voulez vous modifier le type ? (o/n) ")=="o": type = choix_type(Choix)
+        if input("Voulez vous modifier la description ? (o/n) ")=="o": latex,reponse = choix_description(path_tmp)
+        if input("Voulez vous le statut de la description (complet ou pas) ? (o/n) ")=="o": complet = 0 if input("La description est-elle complète ? (o/n) ")=="n" else 1
+        if input("Voulez vous modifier de qui est-ce impliqué ? (o/n) ")=="o": entre_loc = input("Impliquation de qui ? ").split()
+        if input("Voulez vous modifier qui ça implique ? (o/n) ")=="o": sortie_loc = input("Implique qui ? ").split()
+        entre_glob = [liste_note[int(e)].num for e in entre_loc]
+        entre = " ".join(map(str,entre_glob))
+        sortie_glob = [liste_note[int(s)].num for s in sortie_loc]
+        sortie = " ".join(map(str,sortie_glob))
+        if latex != "" and latex != "\n" and reponse != "e" :
+            proc.terminate()
+        if latex != "" and latex != "\n" and reponse != "e" :
+            print("---> Visualisation de la description...")
+            proc = compile(path_pdf_Note,filename,latex)
+        elif reponse != "e" :
+            latex=""
+    if latex != "" and latex != "\n" and reponse != "e" :
+            proc.terminate()
+    rel = []
+    if entre != "":
+        print("\n-------------------- relations entrantes --------------------------")
+        depart = [int(x) for x in entre.split()]
+        Note_arrive = note.nb
+        for Note_depart in depart :
+            rel.append(creer_relation_pour_note(Note_depart,Note_arrive,type,liste_note,path_pdf_Lien,path_tmp,path_Note,filename_relation,Choix_rel))
+            liste_note[trouve_note(liste_note,Note_depart)].sortie += [Note_arrive]
+    if sortie != "":
+        print("\n-------------------- relations sortantes --------------------------")
+        arrive = [int(x) for x in sortie.split()]
+        Note_depart = note.nb
+        for Note_arrive in arrive :
+            rel.append(creer_relation_pour_note(Note_depart,Note_arrive,type,liste_note,path_pdf_Lien,path_tmp,path_Note,filename_relation,Choix_rel))
+            liste_note[trouve_note(liste_note,Note_arrive)].entre += [Note_depart]
+    if sortie != "" or entre != "":
+        mise_a_jour(liste_note,path_Note,filename_note)
+    liste_note.append(note(path_Note+filename_note,[type,complet,detect_note_loc_glob(latex,liste_note),[int(x) for x in entre.split()],[int(x) for x in sortie.split()]]))
+    liste_relation += rel
+
 
 
 def composante_connexe(liste_note):
@@ -912,16 +1052,19 @@ def max_depth(liste_note):
                 k=k+1
             raise ValueError(f"trouve pour num = {num} dans max_depth")
 
-    def raisonnement(liste_note,num_debut,num_debut_init,num_fin,Chemin,Liste_Chemin):
+    def raisonnement(liste_note,num_debut,num_fin,Chemin,Liste_Chemin,num_debut_init=None,id=""):
+        if num_debut_init is None:
+            num_debut_init = num_debut
         k = trouve(num_debut,liste_note)
         sortie = liste_note[k].sortie
         Chemin.append(num_debut)
-        if num_debut!=num_fin:
+        if num_debut!=num_fin or id != "":
             for num_sortie in sortie :
-                raisonnement(liste_note,num_sortie,num_debut_init,num_fin,Chemin,Liste_Chemin)
-                if num_fin in Chemin and num_debut_init==num_debut:
+                Chemin_prec = copy.deepcopy(Chemin)
+                raisonnement(liste_note,num_sortie,num_fin,Chemin,Liste_Chemin,num_debut_init,id+"/"+str(num_sortie))
+                if num_fin == Chemin[-1] and num_debut_init == Chemin[0]:
                     Liste_Chemin.append(Chemin)
-                Chemin = [num_debut_init]
+                Chemin = Chemin_prec
 
     def test_presence(Liste,elem):
         for L in Liste:
@@ -954,18 +1097,20 @@ def max_depth(liste_note):
         for i in range(len(Comp_connexe[c])):
             k = trouve(Comp_connexe[c][i],liste_note)
             if len(liste_note[k].sortie) == 0 :
+                print(liste_note[k].num)
                 Fin[c].append(Comp_connexe[c][i])
                 ElemL00 = []
                 Chemin = []
                 for k in range(len(Comp_connexe[c])) :
                     k0 = trouve(Comp_connexe[c][k],liste_note)
                     if len(liste_note[k0].entre)==0:
-                        raisonnement(liste_note,Comp_connexe[c][k],Comp_connexe[c][k],Fin[c][-1],[],Chemin)
+                        raisonnement(liste_note,Comp_connexe[c][k],Fin[c][-1],[],Chemin)
                         if test_presence(Chemin,Fin[c][-1]) :
                             ElemL00.append(Comp_connexe[c][k])
                 doublon(Chemin)
                 Liste_Chemin0.append(Chemin)
                 ElemL0.append(ElemL00)
+        print(Liste_Chemin0)
         if Liste_Chemin0 == [[]] :
             C0[c] = [[Fin[c][-1]]]
             Liste_Chemin[c] = [[Fin[c][-1],Fin[c][-1]]]
@@ -1121,7 +1266,7 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
                 k0=trouve_note(liste_note,num)
                 if m>0 and dernier_num == -1 :
                     dernier_num = max(liste_note[k0].entre)+1
-                if k_prec != -1 and [dernier_num] == liste_note[k0].entre :
+                if k_prec != -1 and [dernier_num] == liste_note[k0].entre and liste_note[k_prec].type != "démonstration" and liste_note[k0].type != "hypothèse" :
                     k_rel = trouve_rel(num,liste_note[k_prec].num,liste_relation)
                     latex += creer_env(liste_relation[k_rel]) +"\n"
                 liste_prerequis=[]
@@ -1239,6 +1384,242 @@ def generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition
     compile_maitre(path_document_maitre, "document_maitre", latex)
     print("---> Document maitre créé !")
 
+def generate_doc_annotated(liste_note,liste_relation,path_document_maitre,liste_transition,liste_determinant,Choix_note,environnement):
+    print("--------------- Création du document maitre annoté --------------")
+    def trouve_rel(num,num_implique,liste_relation):
+        for k in range(len(liste_relation)):
+            if num in liste_relation[k].extremite and num_implique in liste_relation[k].extremite :
+                return k
+        raise ValueError(f"trouve_rel pour num = {num} et num_implique = {num_implique} dans generate_doc")
+
+    def presence_rel(num,num_implique,liste_relation):
+        for k in range(len(liste_relation)):
+            if num in liste_relation[k].extremite and num_implique in liste_relation[k].extremite :
+                return True
+        return False
+
+    def Latex(dernier,Chemin,Num_utilise,liste_note,liste_relation,liste_transition,liste_determinant,Choix_note,environnement):
+        latex=""
+        def retire_dollar(texte):
+            nouv_texte = ""
+            for i in range(len(texte)) :
+                if texte[i] != "$":
+                    nouv_texte += texte[i]
+            return nouv_texte
+
+        def label_env(Note):
+            return r"\label{"+Note.nature+f":{Note.num}"+r"}"
+
+        def ref_env(Note):
+            if Note.type != "équation":
+                return r"\ref{"+Note.nature+f":{Note.num}"+r"}"
+            return r"\eqref{"+Note.nature+f":{Note.num}"+r"}"
+
+        def categorisation(liste_prerequis,Num_utilise,Num_utilise_prerequis,Num_pas_utilise_prerequis,existe_prec,num_prec):
+            for num_prerequis in liste_prerequis :
+                if ajoute(Num_utilise,num_prerequis) :
+                    Num_pas_utilise_prerequis.append(num_prerequis)
+                elif not existe_prec or num_prec != num_prerequis :
+                    Num_utilise_prerequis.append(num_prerequis)
+
+        def creer_env(Note):
+            latex=""
+            protege = False
+            pres_note = True
+            if Note.nature == "relation" :
+                pres_note = False
+                [n1,n2] = Note.extremite
+                [k1,k2] = [trouve_note(liste_note,n1),trouve_note(liste_note,n2)]
+                if liste_note[k1].type == "équation" and liste_note[k2].type == "équation":
+                    protege = True
+            else:
+                latex += r"\textit{\underline{"+f"Note {trouve_note(liste_note,Note.num)} :"+r"}}"+"\n"
+            for i in range(len(environnement)):
+                if environnement[i][0]==Note.type :
+                    if environnement[i][1] != "" and (pres_note or protege) :
+                        env = environnement[i][1].split()
+                        if (environnement[i][2] == "" and (Note.contenu == "" or Note.contenu == "\n")) or protege :
+                            latex += env[0] + label_env(Note) + ("\n" + "\n".join(env[1:len(env)]) if len(env[1:len(env)]) != 0 else "")
+                        else :
+                            latex += env[0] + label_env(Note) + ("\n" + "\n".join(env[1:len(env)]) if len(env[1:len(env)]) != 0 else "") + "\n"
+
+                    if Note.contenu.strip("\n") != "" and (pres_note or not protege) :
+                        if Note.type == "équation" :
+                            latex += indentation(retire_dollar(Note.contenu))
+                        else :
+                            latex += r"\noindent " + detect_note(Note.contenu,liste_note,liste_determinant,Choix_note)
+                        if environnement[i][1] == "" or (not pres_note and not protege) :
+                            latex += r"\\"
+                        if environnement[i][2] != "" :
+                            latex += "\n"
+
+                    if environnement[i][2] != "" and (pres_note or not protege) :
+                        if not pres_note :
+                            latex += determinant(liste_note[k1].type,liste_determinant,Choix_note).capitalize() + liste_note[k1].type + ref_env(liste_note[k1]) + environnement[i][2] + determinant(liste_note[k2].type,liste_determinant,Choix_note) + liste_note[k2].type + ref_env(liste_note[k2]) 
+                            latex += r"\\"  + "\n"
+                        else :
+                            latex += environnement[i][2]
+            return latex
+
+        def ajoute(Num_utilise,num):
+            if num not in Num_utilise :
+                Num_utilise.append(num)
+                return True
+            return False
+
+        def texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,Liste_num_prerequis,num):
+            latex = ""
+            if presence_rel(Liste_num_prerequis[0],num,liste_relation) :
+                k_rel0 = trouve_rel(Liste_num_prerequis[0],num,liste_relation)
+            else :
+                k_rel0 = -1
+            if len(Liste_num_prerequis) >= 2 or (len(Liste_num_prerequis)==1 and ((k_rel0 == -1) or liste_relation[k_rel0].type != "Equivalence")) :
+                latex += r"\noindent D'après " 
+                for n in range(len(Liste_num_prerequis)) :
+                    num_prerequis = Liste_num_prerequis[-n-1]
+                    k1=trouve_note(liste_note,num_prerequis)
+                    if n==len(Liste_num_prerequis)-1 and len(Liste_num_prerequis)>1 :
+                        latex += " et "
+                    elif n!=0 and len(Liste_num_prerequis)>1 :
+                        latex += ", "
+                    latex += determinant(liste_note[k1].type,liste_determinant,Choix_note) + liste_note[k1].type + " " + ref_env(liste_note[k1])
+                    if n==len(Liste_num_prerequis)-1 :
+                        latex += ", "+liste_transition[rd.randint(0,len(liste_transition)-1)]
+            else :
+                k1=trouve_note(liste_note,Num_utilise_prerequis[0])
+                latex += r"\noindent L'équation "+ref_env(liste_note[k1])+" est équivalente à "
+            k_num = trouve_note(liste_note,num)
+            latex += determinant(liste_note[k_num].type,liste_determinant,Choix_note) + liste_note[k_num].type + " " + ref_env(liste_note[k_num]) + ".\n"
+            return latex
+        
+        k_prec=-1
+        dernier_num=-1
+        pres_preuve = False
+        for m in range(len(Chemin)):
+            num = Chemin[m]
+            if ajoute(Num_utilise,num) : 
+                k0=trouve_note(liste_note,num)
+                if m>0 and dernier_num == -1 :
+                    dernier_num = max(liste_note[k0].entre)+1
+                if k_prec != -1 and [dernier_num] == liste_note[k0].entre and liste_note[k_prec].type != "démonstration" and liste_note[k0].type != "hypothèse" :
+                    k_rel = trouve_rel(num,liste_note[k_prec].num,liste_relation)
+                    latex += creer_env(liste_relation[k_rel]) +"\n"
+                liste_prerequis=[]
+                pre_requis(liste_note,num,liste_prerequis)
+                Num_utilise_prerequis = []
+                Num_pas_utilise_prerequis = []
+                categorisation(liste_prerequis,Num_utilise,Num_utilise_prerequis,Num_pas_utilise_prerequis,k_prec!=-1,liste_note[k_prec].num)
+                num0 = num
+                num1 = num
+                utilise = []
+                for n in range(len(Num_pas_utilise_prerequis)) :
+                    if len(Num_pas_utilise_prerequis)-n-1 not in utilise:
+                        utilise.append(len(Num_pas_utilise_prerequis)-n-1)
+                        num_prerequis = Num_pas_utilise_prerequis[-n-1]
+                        k1=trouve_note(liste_note,num_prerequis)
+                        if presence_rel(num_prerequis,num0,liste_relation):
+                            k_rel = trouve_rel(num_prerequis,num0,liste_relation)
+                            Note = liste_note[k1]
+                            if dernier_num not in Note.entre :
+                                latex += texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,Note.entre,num_prerequis)
+                            if Note.type != "démonstration" and not pres_preuve and n!=len(Num_pas_utilise_prerequis)-1 :
+                                latex += creer_env(Note) + "\n" + creer_env(liste_relation[k_rel]) 
+                            elif not pres_preuve and n!=len(Num_pas_utilise_prerequis)-1 :
+                                preuve = creer_env(Note) + "\n"
+                                pres_preuve = True
+                            else  :
+                                if Note.type != "démonstration" and n!=len(Num_pas_utilise_prerequis)-1 :
+                                    latex += creer_env(Note) + preuve
+                                    preuve = ""
+                                    pres_preuve = False
+                                elif n == len(Num_pas_utilise_prerequis)-1 :
+                                    latex += creer_env(Note) + "\n"
+                                else :
+                                    preuve += creer_env(Note) + "\n"
+                            dernier_num = num_prerequis
+                        else :
+                            if dernier_num not in liste_note[k1].entre and liste_note[k1].entre != [] :
+                                latex += texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,liste_note[k1].entre,liste_note[k1].num)
+                            Note = liste_note[k1]
+                            if Note.type != "démonstration" and not pres_preuve and n != len(Num_pas_utilise_prerequis)-1 :
+                                latex += creer_env(Note) + "\n"
+                            elif not pres_preuve and n == len(Num_pas_utilise_prerequis)-1 :
+                                preuve = creer_env(Note) + "\n"
+                                pres_preuve = True
+                            elif n == len(Num_pas_utilise_prerequis)-1 :
+                                latex += creer_env(Note) + "\n"
+                            else :
+                                if Note.type != "démonstration" :
+                                    latex += creer_env(Note) + preuve
+                                    preuve = ""
+                                    pres_preuve = False
+                                else :
+                                    preuve += creer_env(Note)
+
+                            dernier_num = liste_note[k1].num
+                            for n in range(len(Num_pas_utilise_prerequis)):
+                                num1 = Num_pas_utilise_prerequis[n]
+                                pres = presence_rel(num_prerequis,num1,liste_relation)
+                                if pres and n not in utilise:
+                                    k_rel = trouve_rel(num_prerequis,num1,liste_relation)
+                                    k2 = trouve_note(liste_note,num1)
+                                    if dernier_num not in liste_note[k2].entre :
+                                        latex += texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,liste_note[k2].entre,num1)
+                                    latex += creer_env(liste_relation[k_rel]) + "\n" + creer_env(liste_note[k2])
+                                    dernier_num = num1
+                                    utilise.append(n)
+
+                                    
+                if [dernier_num] != liste_note[k0].entre and liste_note[k0].entre != [] :
+                    latex += texte_justification(liste_relation,liste_note,liste_determinant,Choix_note,liste_transition,liste_note[k0].entre,num)
+
+                Note = liste_note[k0]
+                if m==len(Chemin)-1 and dernier :
+                    if not pres_preuve :
+                        latex += creer_env(Note) + "\n"
+                    else :
+                        latex += creer_env(Note) + preuve + "\n"
+                        pres_preuve = False
+                        preuve = ""
+                else :
+                    if Note.type != "démonstration" and not pres_preuve :
+                        latex += creer_env(Note) + "\n"
+                    elif not pres_preuve :
+                        preuve = creer_env(Note) + "\n"
+                        pres_preuve = True
+                    else :
+                        if Note.type != "démonstration" :
+                            latex += creer_env(Note) + preuve
+                            preuve = ""
+                            pres_preuve = False
+                        else :
+                            preuve += creer_env(Note)
+                k_prec = k0
+                dernier_num = liste_note[k0].num
+        return latex
+        
+    debut,Liste_chemin,fin = max_depth(liste_note)
+    latex=""
+    Num_utilise=[]
+
+    for C in Liste_chemin:
+        if latex != "" :
+            latex += r"\newpage" + "\n"
+        latex+=r"\part{}" + "\n"
+        for n in range(len(C)) :
+            Chemin = C[n]
+            print("--> Ecriture du chemin : ",[trouve_note(liste_note,Chemin[n]) for n in range(len(Chemin))])
+            if n==len(C)-1:
+                dernier = True
+            else :
+                dernier = False
+            latex+=Latex(dernier,Chemin,Num_utilise,liste_note,liste_relation,liste_transition,liste_determinant,Choix_note,environnement)
+            latex += "\n"
+
+    compile_maitre(path_document_maitre, "document_maitre_anote", latex)
+    print("---> Document maitre annoté créé !")
+
+
 def generate_doc_chrono(liste_note,path_Note_chrono):
     print("----------- Création du document chronologique -----------")
     print("---> Ecriture du texte...")
@@ -1341,6 +1722,7 @@ def load_project(name,filename_note,filename_relation):
 
     liste_note = []
     liste_relation = []
+    note.nb = 0
 
     print("Récupération des notes :")
     with open(path_Note+filename_note,"r") as file :
@@ -1462,36 +1844,74 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
         while True :
             creer_note = "Ajouter une Note."
             creer_relation = "Ajouter une relation."
-            edit_note = "Editer/Supprimer une Note."
-            edit_relation = "Editer/Supprimer une relation."
+            inserer_note = "Insérer une note."
+            CREER = ["Création",creer_note,inserer_note,creer_relation]
+            Edit_note = "Editer/Supprimer une Note."
+            Edit_relation = "Editer/Supprimer une relation."
+            EDIT = ["Edition",Edit_note, Edit_relation]
             gen_doc_maitre = "Générer le document maitre."
+            gen_doc_maitre_anotate = "Générer le document maitre annoté."
+            GEN = ["Génération de document", gen_doc_maitre, gen_doc_maitre_anotate]
             aff_incomplet = "Afficher les notes avec contenu incomplet."
             nouv_projet = "Changer/Créer un nouveau projet"
-            Choix_menu = [creer_note,creer_relation,edit_note,edit_relation,gen_doc_maitre,aff_incomplet,nouv_projet]
+            Choix_menu = [CREER,EDIT,GEN,aff_incomplet,nouv_projet]
             if len(liste_note) == 0 :
                 Choix_menu = [creer_note,nouv_projet]
             elif len(liste_note) == 1 :
-                Choix_menu = [creer_note,edit_note,gen_doc_maitre,aff_incomplet,nouv_projet]
+                Choix_menu = [creer_note,Edit_note,GEN,aff_incomplet,nouv_projet]
             elif len(liste_relation) == 0 :
-                Choix_menu = [creer_note,creer_relation,edit_note,gen_doc_maitre,aff_incomplet,nouv_projet]
-            if len(liste_note)>=1 and ancien_choix :
+                Choix_menu = [CREER,Edit_note,GEN,aff_incomplet,nouv_projet]
+            if len(liste_note)>=1 and ancien_choix and (not os.path.isfile(path_Note+namedir_document_chrono+r"/document_chronologique.tex") or max(os.path.getmtime(path_Note+filename_note),os.path.getmtime(path_Note+filename_relation)) > os.path.getmtime(path_Note+namedir_document_chrono+r"/document_chronologique.tex")) :
                 generate_doc_chrono(liste_note,path_document_chrono)
             ancien_choix = True
 
             print("\n------- MENU -------")
             nb_choix = len(Choix_menu)
             for i in range(len(Choix_menu)):
-                print(f"{i+1}) {Choix_menu[i]}")
+                if type(Choix_menu[i]) == list :
+                    print(f"{Choix_menu[i][0]} :")
+                    for j in range(len(Choix_menu[i])-1):
+                        print(f"    {i+1}.{chr(ord('a') + j)} {Choix_menu[i][j+1]}")
+                else :
+                    print(f"{i+1}) {Choix_menu[i]}")
             continuer = 1
             while continuer==1 :
                 continuer = 0
-                num_choix = int(input("\nChoix : "))
-                if num_choix < 1 or num_choix> nb_choix :
+                choix = input("\nChoix : ")
+                pres_point = False
+                num_choix=""
+                num_sous_choix=""
+                for j in range(len(choix)):
+                    if choix[j] == ".":
+                        pres_point = True
+                    if not pres_point :
+                        num_choix+=choix[j]
+                    elif choix[j] != "." :
+                        num_sous_choix+=choix[j]
+                num_choix=int(num_choix)
+                if num_choix < 1 :
                     continuer = 1
-                    print("--- Choix invalide ---")
-            if Choix_menu[num_choix-1] == creer_note :
+                    print(f"--- Choix invalide {num_choix} < 1 ---")
+                elif num_choix> nb_choix :
+                    continuer = 1
+                    print(f"--- Choix invalide {num_choix} > {nb_choix} ---")
+                else :
+                    if type(Choix_menu[num_choix-1]) == list :
+                        if num_sous_choix in [chr(ord('a') + i) for i in range(len(Choix_menu[num_choix-1])-1)]:
+                            num_sous_choix = ord(num_sous_choix) - ord('a') + 1
+                        else :
+                            continuer = 1
+                            print("--- Choix invalide ---")
+            if num_sous_choix == "" :
+                CHOIX = Choix_menu[num_choix-1]
+            else :
+                CHOIX = Choix_menu[num_choix-1][num_sous_choix]
+
+
+            if CHOIX == creer_note :
                 creer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,liste_note,liste_relation,Choix_note,Choix_rel,Protege,filename_relation)
-            if Choix_menu[num_choix-1] == creer_relation:
+
+            if CHOIX == creer_relation:
                 print("Note_1 --> Note_2")
                 k1 = int(input("numéro Note_1 : "))
                 k2 = int(input("numéro Note_2 : "))
@@ -1504,7 +1924,11 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
                     Note1.sortie += [Note2.num]
                     Note2.entre += [Note1.num]  
                     mise_a_jour(liste_note,path_Note,filename_note)
-            if Choix_menu[num_choix-1] == edit_note :
+
+            if CHOIX == inserer_note :
+                inserer_Note(path_pdf_Note,path_pdf_Lien,path_Note,path_tmp,filename_note,liste_note,liste_relation,Choix_note,Choix_rel,Protege,filename_relation)
+
+            if CHOIX == Edit_note :
                 k = int(input("Choisissez le numéro d'une note : "))
                 Note = liste_note[k]
                 rep = input("Voulez-vous éditer (e) ou supprimer (s) une note ? ")
@@ -1515,7 +1939,8 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
                         mise_a_jour_rel(liste_relation,path_Note,filename_relation)
                 else :
                     edit_contenu_note(liste_note,Choix_note,Note.num,path_tmp,path_Note,filename_note,editeur_latex)
-            if Choix_menu[num_choix-1] == edit_relation :
+
+            if CHOIX == Edit_relation :
                 print("Choisir une relation Note_1 --> Note_2")
                 k1 = int(input("Numéro de Note_1 : "))
                 k2 = int(input("Numéro de Note_2 : "))
@@ -1544,15 +1969,21 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
                     rep = input("Voulez-vous éditer (e) ou supprimer (s) cette relation ? ")
                     if rep == "s":
                         if input("Etes vous sûr de vouloir supprimer cette relation ? ")=="o":
-                            rel.sup(path_pdf_Lien,filename_relation,liste_relation,liste_note)
+                            rel.sup(path_pdf_Lien,path_pdf_Note,filename_relation,liste_relation,liste_note)
                             mise_a_jour_rel(liste_relation,path_Note,filename_relation)
                             mise_a_jour(liste_note,path_Note,filename_note)
                     else :
                         edit_relation(rel,Note1,Note2,Choix_rel,liste_relation,path_tmp,path_Note,filename_relation,editeur_latex)
-            if Choix_menu[num_choix-1] == gen_doc_maitre :
+
+            if CHOIX == gen_doc_maitre :
                 generate_doc(liste_note,liste_relation,path_document_maitre,liste_transition,liste_determinant,Choix_note,environnement)
                 ancien_choix = False
-            if Choix_menu[num_choix-1] == aff_incomplet :
+
+            if CHOIX == gen_doc_maitre_anotate :
+                generate_doc_annotated(liste_note,liste_relation,path_document_maitre,liste_transition,liste_determinant,Choix_note,environnement)
+                ancien_choix = False
+
+            if CHOIX == aff_incomplet :
                 presence = False
                 print("\nNote(s) incomplète(s) :")
                 for k in range(len(liste_note)):
@@ -1562,7 +1993,8 @@ def MENU(namedir_pdf_Note,namedir_pdf_Lien,namedir_tmp,namedir_document_maitre,n
                 if not presence :
                     print("-->Toutes les notes sont complètes")
                 ancien_choix = False
-            if Choix_menu[num_choix-1] == nouv_projet :
+
+            if CHOIX == nouv_projet :
                 print("------------------- Changement de projet -------------------------\n")
                 break
             
